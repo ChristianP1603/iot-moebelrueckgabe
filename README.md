@@ -9,7 +9,7 @@ Mitarbeiter scannen NFC-Tags an Moebelstuecken mit dem Smartphone. Der Scan erfa
 - Docker Desktop
 - Node.js 18+
 - Java 17+ (nur bei Option A, nicht noetig bei Option B)
-- ngrok Account (fuer Handy-Tests mit GPS)
+- ngrok (optional, nur fuer Handy-Tests mit GPS - reicht wenn eine Person im Team den Account hat)
 
 ## Inbetriebnahme
 
