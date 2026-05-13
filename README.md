@@ -6,15 +6,12 @@ Mitarbeiter scannen NFC-Tags an Moebelstuecken mit dem Smartphone. Der Scan erfa
 
 ## Voraussetzungen
 
-- Java 17+
-- Maven (oder den mitgelieferten Maven Wrapper `./mvnw` bzw. `mvnw.cmd` auf Windows)
-- Node.js 18+
 - Docker Desktop
-- ngrok (fuer Handy-Tests mit GPS)
+- Node.js 18+
+- Java 17+ (nur bei Option A, nicht noetig bei Option B)
+- ngrok Account (fuer Handy-Tests mit GPS)
 
 ## Inbetriebnahme
-
-Es gibt zwei Moeglichkeiten das Projekt zu starten:
 
 ### Option A: Entwicklungsmodus (Backend lokal)
 
@@ -36,15 +33,17 @@ npm install
 npm run dev
 ```
 
-### Option B: Alles in Docker
+Beim ersten Start werden alle Maven-Dependencies heruntergeladen, das kann einige Minuten dauern.
 
-Backend und Datenbank laufen komplett im Docker.
+### Option B: Backend + DB in Docker
+
+Backend und Datenbank laufen komplett im Docker. Kein Java noetig.
 
 ```bash
-# Backend + DB starten
+# 1. Backend + DB starten
 docker compose up -d
 
-# Frontend starten (neues Terminal)
+# 2. Frontend starten (neues Terminal)
 cd frontend
 npm install
 npm run dev
@@ -54,7 +53,17 @@ npm run dev
 
 `http://localhost:5173` - Die Karte mit allen Moebelstuecken wird angezeigt.
 
-Beim ersten Start werden alle Maven-Dependencies heruntergeladen, das kann einige Minuten dauern. Die Datenbank wird automatisch mit 5 Test-Moebelstuecken befuellt.
+Die Datenbank wird beim ersten Start automatisch mit 5 Test-Moebelstuecken befuellt.
+
+### Stoppen
+
+```bash
+# Alles stoppen
+docker compose down
+
+# Nur Backend/DB stoppen, Daten bleiben erhalten
+docker compose stop
+```
 
 ## Handy-Tests mit NFC und GPS
 
@@ -136,7 +145,7 @@ Bei einem Scan mit Event-Typ RUECKGABE wird ein Camunda-Prozess gestartet. Alle 
 ## Projektstruktur
 
 ```
-IntegrationIotApplication-main/
+iot-moebelrueckgabe/
   Dockerfile                      # Backend als Docker-Image
   docker-compose.yml              # PostgreSQL + Backend im Docker
   pom.xml                         # Maven-Konfiguration
@@ -163,6 +172,7 @@ IntegrationIotApplication-main/
       components/MoebelPopup.jsx    # Popup fuer Kartenmarker
       components/ScanHistory.jsx    # Scan-Verlauf als Timeline
     vite.config.js                  # Vite Dev-Server mit Proxy auf Backend
+
 ```
 
 ## Technologien
