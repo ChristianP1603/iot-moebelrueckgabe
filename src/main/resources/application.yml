@@ -1,0 +1,23 @@
+spring:
+    application:
+        name: integration-iot
+
+    datasource:
+        url: jdbc:postgresql://localhost:5433/database
+        driver-class-name: org.postgresql.Driver
+        username: user
+        password: password
+    jpa:
+        hibernate:
+            ddl-auto: update
+        show-sql: false
+
+    jackson:
+        property-naming-strategy: SNAKE_CASE
+
+server:
+    port: 8081
+
+camunda:
+    client:
+        enabled: false

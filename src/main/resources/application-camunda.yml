@@ -1,0 +1,13 @@
+camunda:
+    client:
+        enabled: true
+        mode: self-managed
+        grpc-address: http://localhost:26500
+        rest-address: http://localhost:8080
+        auth:
+            method: none
+        deployment:
+            enabled: true
+            resource-pattern: "classpath*:*.bpmn"
+        connection:
+            keep-alive: false

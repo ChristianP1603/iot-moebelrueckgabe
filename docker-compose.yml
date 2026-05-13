@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:16
+    container_name: moebel_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: database
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5433:5432"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: moebel-backend:latest
+    container_name: moebel_app
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/database
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+    ports:
+      - "8081:8081"
+
+volumes:
+  db_data:
