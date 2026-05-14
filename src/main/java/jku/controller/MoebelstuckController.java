@@ -4,9 +4,11 @@ import jakarta.validation.Valid;
 import jku.api.MoebelCreateRequest;
 import jku.api.MoebelDetailResponse;
 import jku.entity.Moebelstuck;
+import jku.entity.ProzessInstanz;
 import jku.entity.ScanHistory;
 import jku.entity.Zustand;
 import jku.repository.MoebelstuckRepository;
+import jku.repository.ProzessInstanzRepository;
 import jku.repository.ScanHistoryRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,8 +24,8 @@ public class MoebelstuckController {
 
     private final MoebelstuckRepository moebelRepo;
     private final ScanHistoryRepository scanRepo;
+    private final ProzessInstanzRepository prozessRepo;
 
-    // Standardwerte fuer Reset
     private static final Map<String, MoebelDefaults> STANDARD_DATEN = Map.of(
             "MOEBL-0001", new MoebelDefaults(Zustand.GUT, 48.3363, 14.3194, "Buero 301"),
             "MOEBL-0002", new MoebelDefaults(Zustand.DEFEKT, 48.3358, 14.3188, "Buero 214"),
@@ -32,9 +34,11 @@ public class MoebelstuckController {
             "MOEBL-0005", new MoebelDefaults(Zustand.GUT, 48.3368, 14.3179, "Lager B")
     );
 
-    public MoebelstuckController(MoebelstuckRepository moebelRepo, ScanHistoryRepository scanRepo) {
+    public MoebelstuckController(MoebelstuckRepository moebelRepo, ScanHistoryRepository scanRepo,
+                                 ProzessInstanzRepository prozessRepo) {
         this.moebelRepo = moebelRepo;
         this.scanRepo = scanRepo;
+        this.prozessRepo = prozessRepo;
     }
 
     @GetMapping
@@ -47,7 +51,8 @@ public class MoebelstuckController {
         Moebelstuck m = moebelRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Moebelstueck nicht gefunden"));
         List<ScanHistory> scans = scanRepo.findByMoebelstuckIdOrderByZeitstempelAsc(id);
-        return MoebelDetailResponse.from(m, scans);
+        List<ProzessInstanz> prozesse = prozessRepo.findByMoebelstuckId(id);
+        return MoebelDetailResponse.from(m, scans, prozesse);
     }
 
     @PostMapping
@@ -80,7 +85,7 @@ public class MoebelstuckController {
                 count++;
             }
         }
-        return Map.of("reset", count, "message", count + " Moebelstuecke zurueckgesetzt");
+        return Map.of("count", count, "message", count + " Moebelstuecke zurueckgesetzt");
     }
 
     @PostMapping("/{id}/reset")

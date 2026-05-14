@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
-import java.util.Set;
 
 @Service
 public class ScanProcessService {
@@ -24,25 +23,20 @@ public class ScanProcessService {
 
     private static final String BPMN_PROCESS_ID = "moebelrueckgabe-standard";
 
-    private static final Set<String> VALID_EVENTS = Set.of(
-            "RUECKGABE", "EINLAGERUNG", "PRUEFUNG", "TRANSPORT",
-            "REPARATUR", "ENTSORGUNG", "TEILDEMONTAGE"
+    private static final Map<EventTyp, Zustand> ZUSTAND_NACH_EVENT = Map.of(
+            EventTyp.REPARATUR, Zustand.IN_REPARATUR,
+            EventTyp.ENTSORGUNG, Zustand.ENTSORGT,
+            EventTyp.TEILDEMONTAGE, Zustand.TEILWEISE_BESCHAEDIGT
     );
 
-    private static final Map<String, Zustand> ZUSTAND_NACH_EVENT = Map.of(
-            "REPARATUR", Zustand.IN_REPARATUR,
-            "ENTSORGUNG", Zustand.ENTSORGT,
-            "TEILDEMONTAGE", Zustand.TEILWEISE_BESCHAEDIGT
-    );
-
-    private static final Map<String, String> EVENT_TO_MESSAGE = Map.of(
-            "RUECKGABE", "moebel-rueckgabe-start",
-            "PRUEFUNG", "moebel-pruefung-done",
-            "EINLAGERUNG", "moebel-eingelagert",
-            "TRANSPORT", "moebel-transport",
-            "REPARATUR", "moebel-reparatur-start",
-            "ENTSORGUNG", "moebel-entsorgt",
-            "TEILDEMONTAGE", "moebel-teildemontage"
+    private static final Map<EventTyp, String> EVENT_TO_MESSAGE = Map.of(
+            EventTyp.RUECKGABE, "moebel-rueckgabe-start",
+            EventTyp.PRUEFUNG, "moebel-pruefung-done",
+            EventTyp.EINLAGERUNG, "moebel-eingelagert",
+            EventTyp.TRANSPORT, "moebel-transport",
+            EventTyp.REPARATUR, "moebel-reparatur-start",
+            EventTyp.ENTSORGUNG, "moebel-entsorgt",
+            EventTyp.TEILDEMONTAGE, "moebel-teildemontage"
     );
 
     @Autowired(required = false)
@@ -61,25 +55,18 @@ public class ScanProcessService {
     }
 
     public Moebelstuck handleScan(ScanRequest request) {
-        if (!VALID_EVENTS.contains(request.eventTyp())) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-                    "Ungueltiger event_typ '" + request.eventTyp() + "'");
-        }
-
         Moebelstuck moebel = moebelRepo.findByNfcTagId(request.nfcTagId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag nicht angelegt"));
 
-        // Scan-History speichern
         ScanHistory scan = new ScanHistory();
         scan.setMoebelstuckId(moebel.getId());
         scan.setStandortLat(request.standortLat());
         scan.setStandortLng(request.standortLng());
         scan.setStandortName(request.standortName());
-        scan.setEventTyp(EventTyp.valueOf(request.eventTyp()));
+        scan.setEventTyp(request.eventTyp());
         scan.setGescanntVon(request.gescanntVon());
         scanRepo.save(scan);
 
-        // Möbelstück aktualisieren
         moebel.setStandortName(request.standortName());
         if (request.standortLat() != null && request.standortLng() != null) {
             moebel.setStandortLat(request.standortLat());
@@ -98,7 +85,7 @@ public class ScanProcessService {
         }
 
         try {
-            if ("RUECKGABE".equals(request.eventTyp())) {
+            if (request.eventTyp() == EventTyp.RUECKGABE) {
                 ProcessInstanceEvent event = camundaClient
                         .newCreateInstanceCommand()
                         .bpmnProcessId(BPMN_PROCESS_ID)
@@ -125,7 +112,7 @@ public class ScanProcessService {
                             .correlationKey(moebel.getId().toString())
                             .variables(Map.of(
                                     "standort", request.standortName(),
-                                    "eventTyp", request.eventTyp()
+                                    "eventTyp", request.eventTyp().name()
                             ))
                             .send()
                             .join();

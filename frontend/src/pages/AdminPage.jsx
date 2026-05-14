@@ -53,7 +53,7 @@ export default function AdminPage() {
       if (!res.ok) throw new Error();
       const data = await res.json();
       await loadMoebel();
-      setMessage(`${data.reset} Möbelstücke zurückgesetzt.`);
+      setMessage(`${data.count} Möbelstücke zurückgesetzt.`);
     } catch {
       setMessage("Fehler beim Zurücksetzen.");
     } finally {

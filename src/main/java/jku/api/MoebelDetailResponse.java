@@ -1,6 +1,7 @@
 package jku.api;
 
 import jku.entity.Moebelstuck;
+import jku.entity.ProzessInstanz;
 import jku.entity.ScanHistory;
 
 import java.util.List;
@@ -16,9 +17,10 @@ public record MoebelDetailResponse(
         String standortName,
         Double preis,
         String kaufdatum,
-        List<ScanHistory> scanHistory
+        List<ScanHistory> scanHistory,
+        List<ProzessInstanz> prozessInstanzen
 ) {
-    public static MoebelDetailResponse from(Moebelstuck m, List<ScanHistory> scans) {
+    public static MoebelDetailResponse from(Moebelstuck m, List<ScanHistory> scans, List<ProzessInstanz> prozesse) {
         return new MoebelDetailResponse(
                 m.getId(),
                 m.getNfcTagId(),
@@ -30,7 +32,8 @@ public record MoebelDetailResponse(
                 m.getStandortName(),
                 m.getPreis(),
                 m.getKaufdatum() != null ? m.getKaufdatum().toString() : null,
-                scans
+                scans,
+                prozesse
         );
     }
 }

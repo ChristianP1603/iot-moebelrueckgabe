@@ -1,5 +1,6 @@
 package jku.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
 
@@ -11,8 +12,13 @@ public class ScanHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "moebelstuck_id", nullable = false)
     private Long moebelstuckId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "moebelstuck_id", insertable = false, updatable = false)
+    @JsonIgnore
+    private Moebelstuck moebelstuck;
 
     private Double standortLat;
     private Double standortLng;
