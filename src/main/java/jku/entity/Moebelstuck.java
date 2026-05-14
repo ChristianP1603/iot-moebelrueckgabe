@@ -41,8 +41,6 @@ public class Moebelstuck {
         }
     }
 
-    // Getter & Setter
-
     public Long getId() { return id; }
 
     public String getNfcTagId() { return nfcTagId; }

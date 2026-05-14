@@ -39,13 +39,13 @@ public class ScanController {
         return Map.of(
                 "status", "gefunden",
                 "id", m.getId(),
-                "nfcTagId", m.getNfcTagId(),
+                "nfc_tag_id", m.getNfcTagId(),
                 "bezeichnung", m.getBezeichnung(),
                 "typ", m.getTyp(),
                 "zustand", m.getZustand().name(),
-                "standortName", m.getStandortName() != null ? m.getStandortName() : "",
-                "standortLat", m.getStandortLat() != null ? m.getStandortLat() : 0,
-                "standortLng", m.getStandortLng() != null ? m.getStandortLng() : 0
+                "standort_name", m.getStandortName() != null ? m.getStandortName() : "",
+                "standort_lat", m.getStandortLat() != null ? m.getStandortLat() : 0,
+                "standort_lng", m.getStandortLng() != null ? m.getStandortLng() : 0
         );
     }
 }

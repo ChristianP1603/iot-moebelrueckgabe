@@ -62,7 +62,6 @@ export default function MapPage() {
 
   const handleSelect = useCallback(async (m) => {
     setSelectedId(m.id);
-    if (scanCache[m.id]) return;
     setLoadingId(m.id);
     try {
       const res = await fetch(`${API}/moebelstuck/${m.id}`);
@@ -73,7 +72,7 @@ export default function MapPage() {
     } finally {
       setLoadingId(null);
     }
-  }, [scanCache]);
+  }, []);
 
   const withCoords = moebel.filter((m) => m.standort_lat && m.standort_lng);
   const bounds = withCoords.map((m) => [m.standort_lat, m.standort_lng]);

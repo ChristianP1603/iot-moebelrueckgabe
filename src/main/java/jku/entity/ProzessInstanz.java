@@ -29,8 +29,6 @@ public class ProzessInstanz {
         }
     }
 
-    // Getter & Setter
-
     public Long getId() { return id; }
 
     public Long getMoebelstuckId() { return moebelstuckId; }
