@@ -1,0 +1,27 @@
+package jku.entity;
+
+public enum MoebelTyp {
+    SCHREIBTISCH,
+    STUHL,
+    TISCH,
+    SCHRANK,
+    REGAL,
+    ROLLCONTAINER,
+    KOMMODE,
+    SIDEBOARD,
+    SOFA,
+    SESSEL,
+    GARDEROBE,
+    LAMPE,
+    WHITEBOARD,
+    FLIPCHART,
+    PINNWAND,
+    BETT,
+    MATRATZE,
+    COUCHTISCH,
+    STEHPULT,
+    KONFERENZTISCH,
+    AKTENSCHRANK,
+    VITRINE,
+    SONSTIGES
+}

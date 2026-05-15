@@ -19,8 +19,9 @@ public class Moebelstuck {
     @Column(nullable = false)
     private String bezeichnung;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String typ;
+    private MoebelTyp typ;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -59,8 +60,8 @@ public class Moebelstuck {
     public String getBezeichnung() { return bezeichnung; }
     public void setBezeichnung(String bezeichnung) { this.bezeichnung = bezeichnung; }
 
-    public String getTyp() { return typ; }
-    public void setTyp(String typ) { this.typ = typ; }
+    public MoebelTyp getTyp() { return typ; }
+    public void setTyp(MoebelTyp typ) { this.typ = typ; }
 
     public Zustand getZustand() { return zustand; }
     public void setZustand(Zustand zustand) { this.zustand = zustand; }

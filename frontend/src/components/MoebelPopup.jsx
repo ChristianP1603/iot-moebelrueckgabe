@@ -1,4 +1,5 @@
 import ScanHistory from "./ScanHistory.jsx";
+import { typLabel } from "../constants.js";
 
 const API = "/api";
 
@@ -34,7 +35,7 @@ export default function MoebelPopup({ moebel, scans, loading }) {
         }}>
           {label}
         </span>
-        <span style={{ marginLeft: "8px", color: "#666" }}>{moebel.typ}</span>
+        <span style={{ marginLeft: "8px", color: "#666" }}>{typLabel(moebel.typ)}</span>
       </div>
 
       {moebel.hat_foto && (

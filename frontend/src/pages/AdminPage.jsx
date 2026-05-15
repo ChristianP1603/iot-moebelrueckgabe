@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { typLabel } from "../constants.js";
 
 const API = "/api";
 
@@ -100,7 +101,7 @@ export default function AdminPage() {
           >
             <option value="">Alle Typen ({moebel.length})</option>
             {typen.map((t) => (
-              <option key={t} value={t}>{t} ({moebel.filter((m) => m.typ === t).length})</option>
+              <option key={t} value={t}>{typLabel(t)} ({moebel.filter((m) => m.typ === t).length})</option>
             ))}
           </select>
         </div>

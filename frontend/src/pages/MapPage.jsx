@@ -2,29 +2,54 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, ZoomControl } from "react-leaflet";
 import L from "leaflet";
 import MoebelPopup from "../components/MoebelPopup.jsx";
+import { typLabel } from "../constants.js";
 
 const API = "/api";
 
-const ZUSTAND_FARBEN = {
-  GUT: "#4caf50",
-  DEFEKT: "#ff9800",
-  IN_REPARATUR: "#f44336",
-  ENTSORGT: "#9e9e9e",
-  TEILWEISE_BESCHAEDIGT: "#607d8b",
+const TYP_FARBEN = {
+  SCHREIBTISCH: "#1565c0",
+  STUHL: "#2e7d32",
+  TISCH: "#6a1b9a",
+  SCHRANK: "#e65100",
+  ROLLCONTAINER: "#00838f",
+  REGAL: "#4e342e",
+  LAMPE: "#f9a825",
+  WHITEBOARD: "#546e7a",
+  SOFA: "#c62828",
+  GARDEROBE: "#ad1457",
+  SESSEL: "#1b5e20",
+  STEHPULT: "#0277bd",
+  KONFERENZTISCH: "#4527a0",
+  AKTENSCHRANK: "#bf360c",
+  SIDEBOARD: "#ff6f00",
+  KOMMODE: "#795548",
+  VITRINE: "#00695c",
+  FLIPCHART: "#37474f",
+  PINNWAND: "#880e4f",
+  BETT: "#5d4037",
+  MATRATZE: "#827717",
+  COUCHTISCH: "#311b92",
+  SONSTIGES: "#757575",
 };
 
-function makeIcon(farbe) {
-  return L.divIcon({
-    className: "",
-    html: `<div style="
-      width:28px;height:28px;border-radius:50%;
-      background:${farbe};border:3px solid white;
-      box-shadow:0 2px 6px rgba(0,0,0,0.4);
-    "></div>`,
-    iconSize: [28, 28],
-    iconAnchor: [14, 14],
-    popupAnchor: [0, -16],
-  });
+const iconCache = {};
+
+function getIconForTyp(typ) {
+  if (!iconCache[typ]) {
+    const farbe = TYP_FARBEN[typ] || "#757575";
+    iconCache[typ] = L.divIcon({
+      className: "",
+      html: `<div style="
+        width:28px;height:28px;border-radius:50%;
+        background:${farbe};border:3px solid white;
+        box-shadow:0 2px 6px rgba(0,0,0,0.4);
+      "></div>`,
+      iconSize: [28, 28],
+      iconAnchor: [14, 14],
+      popupAnchor: [0, -16],
+    });
+  }
+  return iconCache[typ];
 }
 
 function MapReady() {
@@ -57,7 +82,6 @@ export default function MapPage() {
   const [selectedId, setSelectedId] = useState(null);
   const [error, setError] = useState(null);
   const [filterTyp, setFilterTyp] = useState("");
-  const [filterZustand, setFilterZustand] = useState("");
 
   useEffect(() => {
     function loadData() {
@@ -89,7 +113,6 @@ export default function MapPage() {
 
   const filtered = moebel.filter((m) => {
     if (filterTyp && m.typ !== filterTyp) return false;
-    if (filterZustand && m.zustand !== filterZustand) return false;
     return true;
   });
 
@@ -126,34 +149,10 @@ export default function MapPage() {
         >
           <option value="">Alle Typen</option>
           {typen.map((t) => (
-            <option key={t} value={t}>{t}</option>
-          ))}
-        </select>
-        <select
-          value={filterZustand}
-          onChange={(e) => setFilterZustand(e.target.value)}
-          style={{ width: "100%", padding: "4px 6px", borderRadius: "4px", border: "1px solid #ccc", fontSize: "0.8rem" }}
-        >
-          <option value="">Alle Zustaende</option>
-          {Object.keys(ZUSTAND_FARBEN).map((z) => (
-            <option key={z} value={z}>{z.replace(/_/g, " ")}</option>
+            <option key={t} value={t}>{typLabel(t)}</option>
           ))}
         </select>
         <div style={{ marginTop: "6px", color: "#999" }}>{withCoords.length} / {moebel.length} angezeigt</div>
-      </div>
-
-      <div style={{
-        position: "fixed", top: "calc(52px + env(safe-area-inset-top) + 10px)", left: "calc(10px + env(safe-area-inset-left))", zIndex: 1000,
-        background: "white", borderRadius: "8px", padding: "10px 14px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.15)", fontSize: "0.8rem",
-      }}>
-        <div style={{ fontWeight: 600, marginBottom: "6px" }}>Legende</div>
-        {Object.entries(ZUSTAND_FARBEN).map(([z, f]) => (
-          <div key={z} style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "3px" }}>
-            <div style={{ width: 12, height: 12, borderRadius: "50%", background: f, flexShrink: 0 }} />
-            <span style={{ textTransform: "capitalize" }}>{z.replace(/_/g, " ")}</span>
-          </div>
-        ))}
       </div>
 
       <MapContainer
@@ -174,7 +173,7 @@ export default function MapPage() {
           <Marker
             key={m.id}
             position={[m.standort_lat, m.standort_lng]}
-            icon={makeIcon(ZUSTAND_FARBEN[m.zustand] || "#999")}
+            icon={getIconForTyp(m.typ)}
             eventHandlers={{ click: () => handleSelect(m) }}
           >
             <Popup maxWidth={320} minWidth={240}>

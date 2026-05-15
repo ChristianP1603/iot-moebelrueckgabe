@@ -42,7 +42,7 @@ public class ScanController {
                 "nfc_tag_id", m.getNfcTagId(),
                 "bezeichnung", m.getBezeichnung(),
                 "typ", m.getTyp(),
-                "zustand", m.getZustand().name(),
+                "zustand", m.getZustand(),
                 "standort_name", m.getStandortName() != null ? m.getStandortName() : "",
                 "standort_lat", m.getStandortLat() != null ? m.getStandortLat() : 0,
                 "standort_lng", m.getStandortLng() != null ? m.getStandortLng() : 0

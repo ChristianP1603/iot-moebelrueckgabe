@@ -1,14 +1,17 @@
 package jku.api;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jku.entity.MoebelTyp;
+import jku.entity.Zustand;
 import java.time.LocalDate;
 
 public record MoebelCreateRequest(
         @NotBlank String nfcTagId,
         @NotBlank String bezeichnung,
-        @NotBlank String typ,
+        @NotNull MoebelTyp typ,
         Double preis,
         LocalDate kaufdatum,
-        String zustand,
+        Zustand zustand,
         Boolean standardmoebel
 ) {}

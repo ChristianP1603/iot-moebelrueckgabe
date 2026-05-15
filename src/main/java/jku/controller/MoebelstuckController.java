@@ -92,7 +92,7 @@ public class MoebelstuckController {
         m.setNfcTagId(request.nfcTagId());
         m.setBezeichnung(request.bezeichnung());
         m.setTyp(request.typ());
-        m.setZustand(request.zustand() != null ? Zustand.valueOf(request.zustand()) : Zustand.GUT);
+        m.setZustand(request.zustand() != null ? request.zustand() : Zustand.GUT);
         m.setPreis(request.preis());
         m.setKaufdatum(request.kaufdatum());
         if (request.standardmoebel() != null) {

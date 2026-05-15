@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
+import { typLabel } from "../constants.js";
 
 const API = "/api";
 
@@ -247,7 +248,7 @@ export default function ScanPage() {
           </span>
           <table style={{ width: "100%", fontSize: "0.85rem", borderCollapse: "collapse" }}>
             <tbody>
-              <tr><td style={{ color: "#888", paddingRight: "8px" }}>Typ</td><td>{moebel.typ}</td></tr>
+              <tr><td style={{ color: "#888", paddingRight: "8px" }}>Typ</td><td>{typLabel(moebel.typ)}</td></tr>
               <tr><td style={{ color: "#888" }}>Tag-ID</td><td style={{ fontFamily: "monospace" }}>{moebel.nfc_tag_id}</td></tr>
               {moebel.standort_name && <tr><td style={{ color: "#888" }}>Letzter Standort</td><td>{moebel.standort_name}</td></tr>}
               {moebel.preis && <tr><td style={{ color: "#888" }}>Preis</td><td>{Number(moebel.preis).toFixed(2)} €</td></tr>}

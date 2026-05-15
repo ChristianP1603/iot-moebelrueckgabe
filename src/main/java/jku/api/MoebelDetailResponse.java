@@ -1,8 +1,10 @@
 package jku.api;
 
+import jku.entity.MoebelTyp;
 import jku.entity.Moebelstuck;
 import jku.entity.ProzessInstanz;
 import jku.entity.ScanHistory;
+import jku.entity.Zustand;
 
 import java.util.List;
 
@@ -10,8 +12,8 @@ public record MoebelDetailResponse(
         Long id,
         String nfcTagId,
         String bezeichnung,
-        String typ,
-        String zustand,
+        MoebelTyp typ,
+        Zustand zustand,
         Double standortLat,
         Double standortLng,
         String standortName,
@@ -27,7 +29,7 @@ public record MoebelDetailResponse(
                 m.getNfcTagId(),
                 m.getBezeichnung(),
                 m.getTyp(),
-                m.getZustand().name(),
+                m.getZustand(),
                 m.getStandortLat(),
                 m.getStandortLng(),
                 m.getStandortName(),
