@@ -2,10 +2,9 @@ package jku.entity;
 
 public enum EventTyp {
     RUECKGABE,
-    EINLAGERUNG,
     PRUEFUNG,
-    TRANSPORT,
+    EINLAGERUNG,
     REPARATUR,
-    ENTSORGUNG,
-    TEILDEMONTAGE
+    TEILDEMONTAGE,
+    ENTSORGUNG
 }

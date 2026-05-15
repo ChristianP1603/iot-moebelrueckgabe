@@ -1,11 +1,13 @@
 import ScanHistory from "./ScanHistory.jsx";
 
+const API = "/api";
+
 const ZUSTAND_LABELS = {
   GUT: "Gut",
   DEFEKT: "Defekt",
   IN_REPARATUR: "In Reparatur",
   ENTSORGT: "Entsorgt",
-  TEILWEISE_BESCHAEDIGT: "Teilweise beschaedigt",
+  TEILWEISE_BESCHAEDIGT: "Teilweise beschädigt",
 };
 
 const ZUSTAND_COLORS = {
@@ -34,6 +36,17 @@ export default function MoebelPopup({ moebel, scans, loading }) {
         </span>
         <span style={{ marginLeft: "8px", color: "#666" }}>{moebel.typ}</span>
       </div>
+
+      {moebel.hat_foto && (
+        <div style={{ marginBottom: "8px" }}>
+          <img
+            src={`${API}/moebelstuck/${moebel.id}/foto`}
+            alt={moebel.bezeichnung}
+            style={{ width: "100%", borderRadius: "6px", maxHeight: "160px", objectFit: "cover" }}
+          />
+        </div>
+      )}
+
       <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "10px" }}>
         <tbody>
           {moebel.standort_name && (

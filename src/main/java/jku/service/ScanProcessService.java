@@ -3,7 +3,12 @@ package jku.service;
 import io.camunda.client.CamundaClient;
 import io.camunda.client.api.response.ProcessInstanceEvent;
 import jku.api.ScanRequest;
-import jku.entity.*;
+import jku.entity.EventTyp;
+import jku.entity.Moebelstuck;
+import jku.entity.Pruefergebnis;
+import jku.entity.Zustand;
+import jku.entity.ScanHistory;
+import jku.entity.ProzessInstanz;
 import jku.repository.MoebelstuckRepository;
 import jku.repository.ProzessInstanzRepository;
 import jku.repository.ScanHistoryRepository;
@@ -26,14 +31,21 @@ public class ScanProcessService {
     private static final Map<EventTyp, Zustand> ZUSTAND_NACH_EVENT = Map.of(
             EventTyp.REPARATUR, Zustand.IN_REPARATUR,
             EventTyp.ENTSORGUNG, Zustand.ENTSORGT,
-            EventTyp.TEILDEMONTAGE, Zustand.TEILWEISE_BESCHAEDIGT
+            EventTyp.TEILDEMONTAGE, Zustand.TEILWEISE_BESCHAEDIGT,
+            EventTyp.EINLAGERUNG, Zustand.GUT
+    );
+
+    private static final Map<Pruefergebnis, Zustand> ZUSTAND_NACH_PRUEFUNG = Map.of(
+            Pruefergebnis.GUT, Zustand.GUT,
+            Pruefergebnis.REPARATUR, Zustand.IN_REPARATUR,
+            Pruefergebnis.TEILWEISE_BESCHAEDIGT, Zustand.TEILWEISE_BESCHAEDIGT,
+            Pruefergebnis.SCHLECHT, Zustand.DEFEKT
     );
 
     private static final Map<EventTyp, String> EVENT_TO_MESSAGE = Map.of(
             EventTyp.RUECKGABE, "moebel-rueckgabe-start",
             EventTyp.PRUEFUNG, "moebel-pruefung-done",
             EventTyp.EINLAGERUNG, "moebel-eingelagert",
-            EventTyp.TRANSPORT, "moebel-transport",
             EventTyp.REPARATUR, "moebel-reparatur-start",
             EventTyp.ENTSORGUNG, "moebel-entsorgt",
             EventTyp.TEILDEMONTAGE, "moebel-teildemontage"
@@ -65,6 +77,8 @@ public class ScanProcessService {
         scan.setStandortName(request.standortName());
         scan.setEventTyp(request.eventTyp());
         scan.setGescanntVon(request.gescanntVon());
+        scan.setPruefergebnis(request.pruefergebnis());
+        scan.setErsatzteileVorhanden(request.ersatzteileVorhanden());
         scanRepo.save(scan);
 
         moebel.setStandortName(request.standortName());
@@ -72,9 +86,13 @@ public class ScanProcessService {
             moebel.setStandortLat(request.standortLat());
             moebel.setStandortLng(request.standortLng());
         }
-        Zustand neuerZustand = ZUSTAND_NACH_EVENT.get(request.eventTyp());
-        if (neuerZustand != null) {
-            moebel.setZustand(neuerZustand);
+        if (request.eventTyp() == EventTyp.PRUEFUNG && request.pruefergebnis() != null) {
+            moebel.setZustand(ZUSTAND_NACH_PRUEFUNG.get(request.pruefergebnis()));
+        } else {
+            Zustand neuerZustand = ZUSTAND_NACH_EVENT.get(request.eventTyp());
+            if (neuerZustand != null) {
+                moebel.setZustand(neuerZustand);
+            }
         }
         moebelRepo.save(moebel);
 
@@ -107,13 +125,20 @@ public class ScanProcessService {
             } else {
                 String message = EVENT_TO_MESSAGE.get(request.eventTyp());
                 if (message != null) {
+                    Map<String, Object> vars = new java.util.HashMap<>(Map.of(
+                            "standort", request.standortName(),
+                            "eventTyp", request.eventTyp().name()
+                    ));
+                    if (request.pruefergebnis() != null) {
+                        vars.put("pruefergebnis", request.pruefergebnis().name());
+                    }
+                    if (request.ersatzteileVorhanden() != null) {
+                        vars.put("ersatzteileVorhanden", request.ersatzteileVorhanden());
+                    }
                     camundaClient.newPublishMessageCommand()
                             .messageName(message)
                             .correlationKey(moebel.getId().toString())
-                            .variables(Map.of(
-                                    "standort", request.standortName(),
-                                    "eventTyp", request.eventTyp().name()
-                            ))
+                            .variables(vars)
                             .send()
                             .join();
                     log.info("Camunda Message '{}' korreliert fuer {}", message, moebel.getId());

@@ -3,6 +3,7 @@ package jku.api;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jku.entity.EventTyp;
+import jku.entity.Pruefergebnis;
 
 public record ScanRequest(
         @NotBlank String nfcTagId,
@@ -10,5 +11,7 @@ public record ScanRequest(
         Double standortLng,
         @NotBlank String standortName,
         @NotNull EventTyp eventTyp,
-        String gescanntVon
+        String gescanntVon,
+        Pruefergebnis pruefergebnis,
+        Boolean ersatzteileVorhanden
 ) {}

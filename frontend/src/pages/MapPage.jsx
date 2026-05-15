@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, ZoomControl } from "react-leaflet";
 import L from "leaflet";
 import MoebelPopup from "../components/MoebelPopup.jsx";
 
@@ -27,14 +27,23 @@ function makeIcon(farbe) {
   });
 }
 
+function MapReady() {
+  const map = useMap();
+  useEffect(() => {
+    setTimeout(() => map.invalidateSize(), 200);
+  }, []);
+  return null;
+}
+
 function FitBounds({ positions }) {
   const map = useMap();
   const hasFitted = useRef(false);
   useEffect(() => {
     if (positions.length > 0 && !hasFitted.current) {
       setTimeout(() => {
+        map.invalidateSize();
         map.fitBounds(positions, { padding: [40, 40], maxZoom: 17 });
-      }, 100);
+      }, 300);
       hasFitted.current = true;
     }
   }, [positions.length]);
@@ -47,6 +56,8 @@ export default function MapPage() {
   const [loadingId, setLoadingId] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
   const [error, setError] = useState(null);
+  const [filterTyp, setFilterTyp] = useState("");
+  const [filterZustand, setFilterZustand] = useState("");
 
   useEffect(() => {
     function loadData() {
@@ -74,7 +85,15 @@ export default function MapPage() {
     }
   }, []);
 
-  const withCoords = moebel.filter((m) => m.standort_lat && m.standort_lng);
+  const typen = [...new Set(moebel.map((m) => m.typ))].sort();
+
+  const filtered = moebel.filter((m) => {
+    if (filterTyp && m.typ !== filterTyp) return false;
+    if (filterZustand && m.zustand !== filterZustand) return false;
+    return true;
+  });
+
+  const withCoords = filtered.filter((m) => m.standort_lat && m.standort_lng);
   const bounds = withCoords.map((m) => [m.standort_lat, m.standort_lng]);
 
   const selectedScans = selectedId ? (scanCache[selectedId] || []) : [];
@@ -95,7 +114,36 @@ export default function MapPage() {
       )}
 
       <div style={{
-        position: "absolute", top: 10, right: "calc(10px + env(safe-area-inset-right))", zIndex: 1000,
+        position: "absolute", bottom: 30, right: "calc(10px + env(safe-area-inset-right))", zIndex: 1000,
+        background: "white", borderRadius: "8px", padding: "10px 14px",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.15)", fontSize: "0.8rem",
+      }}>
+        <div style={{ fontWeight: 600, marginBottom: "6px" }}>Filter</div>
+        <select
+          value={filterTyp}
+          onChange={(e) => setFilterTyp(e.target.value)}
+          style={{ width: "100%", padding: "4px 6px", borderRadius: "4px", border: "1px solid #ccc", fontSize: "0.8rem", marginBottom: "6px" }}
+        >
+          <option value="">Alle Typen</option>
+          {typen.map((t) => (
+            <option key={t} value={t}>{t}</option>
+          ))}
+        </select>
+        <select
+          value={filterZustand}
+          onChange={(e) => setFilterZustand(e.target.value)}
+          style={{ width: "100%", padding: "4px 6px", borderRadius: "4px", border: "1px solid #ccc", fontSize: "0.8rem" }}
+        >
+          <option value="">Alle Zustaende</option>
+          {Object.keys(ZUSTAND_FARBEN).map((z) => (
+            <option key={z} value={z}>{z.replace(/_/g, " ")}</option>
+          ))}
+        </select>
+        <div style={{ marginTop: "6px", color: "#999" }}>{withCoords.length} / {moebel.length} angezeigt</div>
+      </div>
+
+      <div style={{
+        position: "fixed", top: "calc(52px + env(safe-area-inset-top) + 10px)", left: "calc(10px + env(safe-area-inset-left))", zIndex: 1000,
         background: "white", borderRadius: "8px", padding: "10px 14px",
         boxShadow: "0 2px 8px rgba(0,0,0,0.15)", fontSize: "0.8rem",
       }}>
@@ -103,17 +151,19 @@ export default function MapPage() {
         {Object.entries(ZUSTAND_FARBEN).map(([z, f]) => (
           <div key={z} style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "3px" }}>
             <div style={{ width: 12, height: 12, borderRadius: "50%", background: f, flexShrink: 0 }} />
-            <span style={{ textTransform: "capitalize" }}>{z.replace("_", " ")}</span>
+            <span style={{ textTransform: "capitalize" }}>{z.replace(/_/g, " ")}</span>
           </div>
         ))}
-        <div style={{ marginTop: "8px", color: "#999" }}>{withCoords.length} Möbelstücke</div>
       </div>
 
       <MapContainer
         center={[48.336, 14.32]}
         zoom={15}
+        zoomControl={false}
         style={{ height: "calc(100vh - 52px - env(safe-area-inset-top))", width: "100%" }}
       >
+        <MapReady />
+        <ZoomControl position="bottomleft" />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

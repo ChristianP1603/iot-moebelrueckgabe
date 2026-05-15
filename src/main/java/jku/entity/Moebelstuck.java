@@ -1,5 +1,6 @@
 package jku.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -30,6 +31,15 @@ public class Moebelstuck {
     private String standortName;
     private Double preis;
     private LocalDate kaufdatum;
+
+    @Column(nullable = false)
+    private boolean standardmoebel = true;
+
+    @Column(columnDefinition = "bytea")
+    @JsonIgnore
+    private byte[] foto;
+
+    private boolean hatFoto;
 
     @Column(updatable = false)
     private OffsetDateTime createdAt;
@@ -69,6 +79,17 @@ public class Moebelstuck {
 
     public LocalDate getKaufdatum() { return kaufdatum; }
     public void setKaufdatum(LocalDate kaufdatum) { this.kaufdatum = kaufdatum; }
+
+    public boolean isStandardmoebel() { return standardmoebel; }
+    public void setStandardmoebel(boolean standardmoebel) { this.standardmoebel = standardmoebel; }
+
+    public byte[] getFoto() { return foto; }
+    public void setFoto(byte[] foto) {
+        this.foto = foto;
+        this.hatFoto = foto != null && foto.length > 0;
+    }
+
+    public boolean isHatFoto() { return hatFoto; }
 
     public OffsetDateTime getCreatedAt() { return createdAt; }
 }

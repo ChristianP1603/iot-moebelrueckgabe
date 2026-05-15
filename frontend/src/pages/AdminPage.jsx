@@ -15,6 +15,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [resetting, setResetting] = useState(null);
   const [message, setMessage] = useState(null);
+  const [filterTyp, setFilterTyp] = useState("");
 
   async function loadMoebel() {
     try {
@@ -28,6 +29,9 @@ export default function AdminPage() {
   }
 
   useEffect(() => { loadMoebel(); }, []);
+
+  const typen = [...new Set(moebel.map((m) => m.typ))].sort();
+  const filtered = filterTyp ? moebel.filter((m) => m.typ === filterTyp) : moebel;
 
   async function resetEinzeln(id) {
     setResetting(id);
@@ -81,8 +85,24 @@ export default function AdminPage() {
               minHeight: "44px",
             }}
           >
-            {resetting === "all" ? "Wird zurückgesetzt..." : "Alle zurücksetzen"}
+            {resetting === "all" ? "Wird zurückgesetzt…" : "Alle zurücksetzen"}
           </button>
+        </div>
+
+        <div style={{ marginBottom: "14px" }}>
+          <select
+            value={filterTyp}
+            onChange={(e) => setFilterTyp(e.target.value)}
+            style={{
+              width: "100%", padding: "8px 12px", borderRadius: "6px",
+              border: "1px solid #ddd", fontSize: "0.85rem",
+            }}
+          >
+            <option value="">Alle Typen ({moebel.length})</option>
+            {typen.map((t) => (
+              <option key={t} value={t}>{t} ({moebel.filter((m) => m.typ === t).length})</option>
+            ))}
+          </select>
         </div>
 
         {message && (
@@ -96,7 +116,7 @@ export default function AdminPage() {
           </div>
         )}
 
-        {moebel.map((m) => (
+        {filtered.map((m) => (
           <div key={m.id} style={{
             display: "flex", justifyContent: "space-between", alignItems: "center",
             padding: "12px 0", borderBottom: "1px solid #eee",
@@ -107,7 +127,7 @@ export default function AdminPage() {
                 <span style={{ fontFamily: "monospace" }}>{m.nfc_tag_id}</span>
                 <span style={{ margin: "0 6px" }}>·</span>
                 <span style={{ color: ZUSTAND_FARBEN[m.zustand] || "#999", fontWeight: 600 }}>
-                  {m.zustand?.replace("_", " ")}
+                  {m.zustand?.replace(/_/g, " ")}
                 </span>
                 {m.standort_name && (
                   <>

@@ -9,5 +9,6 @@ public record MoebelCreateRequest(
         @NotBlank String typ,
         Double preis,
         LocalDate kaufdatum,
-        String zustand
+        String zustand,
+        Boolean standardmoebel
 ) {}

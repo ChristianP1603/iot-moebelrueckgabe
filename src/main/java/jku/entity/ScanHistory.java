@@ -30,6 +30,11 @@ public class ScanHistory {
 
     private String gescanntVon;
 
+    @Enumerated(EnumType.STRING)
+    private Pruefergebnis pruefergebnis;
+
+    private Boolean ersatzteileVorhanden;
+
     @Column(nullable = false)
     private OffsetDateTime zeitstempel;
 
@@ -59,6 +64,12 @@ public class ScanHistory {
 
     public String getGescanntVon() { return gescanntVon; }
     public void setGescanntVon(String gescanntVon) { this.gescanntVon = gescanntVon; }
+
+    public Pruefergebnis getPruefergebnis() { return pruefergebnis; }
+    public void setPruefergebnis(Pruefergebnis pruefergebnis) { this.pruefergebnis = pruefergebnis; }
+
+    public Boolean getErsatzteileVorhanden() { return ersatzteileVorhanden; }
+    public void setErsatzteileVorhanden(Boolean ersatzteileVorhanden) { this.ersatzteileVorhanden = ersatzteileVorhanden; }
 
     public OffsetDateTime getZeitstempel() { return zeitstempel; }
     public void setZeitstempel(OffsetDateTime zeitstempel) { this.zeitstempel = zeitstempel; }

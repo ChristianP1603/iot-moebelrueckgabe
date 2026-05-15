@@ -1,16 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 
 const API = "/api";
 
 const EVENT_OPTIONEN = [
   { value: "RUECKGABE", label: "Rückgabe" },
-  { value: "EINLAGERUNG", label: "Einlagerung" },
   { value: "PRUEFUNG", label: "Prüfung" },
-  { value: "TRANSPORT", label: "Transport" },
+  { value: "EINLAGERUNG", label: "Einlagerung" },
   { value: "REPARATUR", label: "Reparatur" },
-  { value: "ENTSORGUNG", label: "Entsorgung" },
   { value: "TEILDEMONTAGE", label: "Teildemontage" },
+  { value: "ENTSORGUNG", label: "Entsorgung" },
+];
+
+const PRUEFERGEBNIS_OPTIONEN = [
+  { value: "GUT", label: "Guter Zustand" },
+  { value: "REPARATUR", label: "Reparatur nötig" },
+  { value: "TEILWEISE_BESCHAEDIGT", label: "Teilweise beschädigt" },
+  { value: "SCHLECHT", label: "Nicht reparierbar" },
 ];
 
 const ZUSTAND_FARBEN = {
@@ -35,6 +41,11 @@ export default function ScanPage() {
   const [gescanntVon, setGescanntVon] = useState("");
   const [gps, setGps] = useState({ lat: null, lng: null });
   const [gpsStatus, setGpsStatus] = useState("ausstehend");
+  const [foto, setFoto] = useState(null);
+  const [fotoPreview, setFotoPreview] = useState(null);
+  const fileInputRef = useRef(null);
+  const [pruefergebnis, setPruefergebnis] = useState("GUT");
+  const [ersatzteileVorhanden, setErsatzteileVorhanden] = useState(false);
 
   const [submitting, setSubmitting] = useState(false);
   const [erfolg, setErfolg] = useState(null);
@@ -85,6 +96,15 @@ export default function ScanPage() {
     lookupTag(manualTagId.trim());
   }
 
+  function handleFotoChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setFoto(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setFotoPreview(ev.target.result);
+    reader.readAsDataURL(file);
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     if (!standortName.trim() || !activeTagId) return;
@@ -101,13 +121,25 @@ export default function ScanPage() {
           standort_name: standortName.trim(),
           event_typ: eventTyp,
           gescannt_von: gescanntVon.trim() || null,
+          pruefergebnis: eventTyp === "PRUEFUNG" ? pruefergebnis : null,
+          ersatzteile_vorhanden: eventTyp === "REPARATUR" ? ersatzteileVorhanden : null,
         }),
       });
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.detail || "Fehler beim Scannen");
+        throw new Error(err.message || err.detail || "Fehler beim Scannen");
       }
       const data = await res.json();
+
+      if (foto && data.id) {
+        const formData = new FormData();
+        formData.append("file", foto);
+        await fetch(`${API}/moebelstuck/${data.id}/foto`, {
+          method: "POST",
+          body: formData,
+        });
+      }
+
       setErfolg(data);
     } catch (err) {
       setFehler(err.message);
@@ -153,9 +185,9 @@ export default function ScanPage() {
           <div style={{ marginTop: "12px", fontSize: "0.9rem", color: "#555" }}>
             <strong>{erfolg.bezeichnung}</strong> wurde als <strong>{eventTyp}</strong> registriert.
           </div>
-          <div style={{ fontSize: "0.85rem", color: "#999", marginTop: "4px" }}>Standort:{erfolg.standort_name}</div>
+          <div style={{ fontSize: "0.85rem", color: "#999", marginTop: "4px" }}>Standort: {erfolg.standort_name}</div>
           <button
-            onClick={() => { setErfolg(null); setStandortName(""); }}
+            onClick={() => { setErfolg(null); setStandortName(""); setFoto(null); setFotoPreview(null); setPruefergebnis("GUT"); setErsatzteileVorhanden(false); }}
             style={{
               marginTop: "20px", padding: "14px 28px", borderRadius: "10px",
               border: "none", background: "#2196f3", color: "white",
@@ -211,7 +243,7 @@ export default function ScanPage() {
             background: ZUSTAND_FARBEN[moebel.zustand] || "#999",
             color: "white", fontSize: "0.8rem", fontWeight: 600, marginBottom: "10px",
           }}>
-            {moebel.zustand?.replace("_", " ")}
+            {moebel.zustand?.replace(/_/g, " ")}
           </span>
           <table style={{ width: "100%", fontSize: "0.85rem", borderCollapse: "collapse" }}>
             <tbody>
@@ -260,11 +292,77 @@ export default function ScanPage() {
               style={inputStyle}
             />
 
+            {eventTyp === "RUECKGABE" && (
+              <>
+                <label style={labelStyle}>Foto des Möbelstücks</label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleFotoChange}
+                  style={{ display: "none" }}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{
+                    width: "100%", padding: "12px", borderRadius: "8px",
+                    border: "2px dashed #ccc", background: fotoPreview ? "#e8f5e9" : "#fafafa",
+                    color: "#555", fontSize: "0.9rem", cursor: "pointer",
+                    marginBottom: "14px", minHeight: "48px",
+                  }}
+                >
+                  {fotoPreview ? "Foto aufgenommen – zum Ändern tippen" : "Foto aufnehmen oder auswählen"}
+                </button>
+                {fotoPreview && (
+                  <div style={{ marginBottom: "14px" }}>
+                    <img
+                      src={fotoPreview}
+                      alt="Vorschau"
+                      style={{ width: "100%", borderRadius: "8px", maxHeight: "200px", objectFit: "cover" }}
+                    />
+                  </div>
+                )}
+              </>
+            )}
+
+            {eventTyp === "PRUEFUNG" && (
+              <>
+                <label style={labelStyle}>Prüfergebnis *</label>
+                <select
+                  value={pruefergebnis}
+                  onChange={(e) => setPruefergebnis(e.target.value)}
+                  style={inputStyle}
+                >
+                  {PRUEFERGEBNIS_OPTIONEN.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              </>
+            )}
+
+            {eventTyp === "REPARATUR" && (
+              <label style={{
+                display: "flex", alignItems: "center", gap: "10px",
+                fontSize: "0.9rem", fontWeight: 600, color: "#555",
+                marginBottom: "14px", cursor: "pointer",
+              }}>
+                <input
+                  type="checkbox"
+                  checked={ersatzteileVorhanden}
+                  onChange={(e) => setErsatzteileVorhanden(e.target.checked)}
+                  style={{ width: "20px", height: "20px", accentColor: "#1565c0" }}
+                />
+                Ersatzteile vorhanden
+              </label>
+            )}
+
             <div style={{ fontSize: "0.78rem", color: gpsStatus === "erfasst" ? "#4caf50" : "#999", marginBottom: "16px" }}>
               GPS: {gpsStatus === "erfasst"
                 ? `${gps.lat?.toFixed(5)}, ${gps.lng?.toFixed(5)}`
                 : gpsStatus === "verweigert"
-                ? "Berechtigung verweigert – Standort wird ohne GPS gespeichert"
+                ? "Berechtigung verweigert - Standort wird ohne GPS gespeichert"
                 : gpsStatus}
             </div>
 

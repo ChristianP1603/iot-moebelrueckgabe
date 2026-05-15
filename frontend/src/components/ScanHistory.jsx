@@ -1,21 +1,26 @@
 const EVENT_LABELS = {
   RUECKGABE: "Rückgabe",
-  EINLAGERUNG: "Einlagerung",
   PRUEFUNG: "Prüfung",
-  TRANSPORT: "Transport",
+  EINLAGERUNG: "Einlagerung",
   REPARATUR: "Reparatur",
-  ENTSORGUNG: "Entsorgung",
   TEILDEMONTAGE: "Teildemontage",
+  ENTSORGUNG: "Entsorgung",
+};
+
+const PRUEFERGEBNIS_LABELS = {
+  GUT: "Guter Zustand",
+  REPARATUR: "Reparatur nötig",
+  TEILWEISE_BESCHAEDIGT: "Teilweise beschädigt",
+  SCHLECHT: "Nicht reparierbar",
 };
 
 const EVENT_COLORS = {
   RUECKGABE: "#2196f3",
-  EINLAGERUNG: "#00796b",
   PRUEFUNG: "#5c6bc0",
-  TRANSPORT: "#9c27b0",
+  EINLAGERUNG: "#00796b",
   REPARATUR: "#e91e63",
-  ENTSORGUNG: "#795548",
   TEILDEMONTAGE: "#455a64",
+  ENTSORGUNG: "#795548",
 };
 
 export default function ScanHistory({ scans }) {
@@ -47,6 +52,16 @@ export default function ScanHistory({ scans }) {
           </div>
           {s.standort_name && (
             <div style={{ fontSize: "0.82rem", color: "#555" }}>{s.standort_name}</div>
+          )}
+          {s.pruefergebnis && (
+            <div style={{ fontSize: "0.78rem", color: "#888" }}>
+              Ergebnis: {PRUEFERGEBNIS_LABELS[s.pruefergebnis] || s.pruefergebnis}
+            </div>
+          )}
+          {s.ersatzteile_vorhanden != null && s.event_typ === "REPARATUR" && (
+            <div style={{ fontSize: "0.78rem", color: "#888" }}>
+              Ersatzteile: {s.ersatzteile_vorhanden ? "vorhanden" : "nicht vorhanden"}
+            </div>
           )}
         </div>
       ))}

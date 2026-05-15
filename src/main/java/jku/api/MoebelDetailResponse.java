@@ -17,6 +17,7 @@ public record MoebelDetailResponse(
         String standortName,
         Double preis,
         String kaufdatum,
+        boolean hatFoto,
         List<ScanHistory> scanHistory,
         List<ProzessInstanz> prozessInstanzen
 ) {
@@ -32,6 +33,7 @@ public record MoebelDetailResponse(
                 m.getStandortName(),
                 m.getPreis(),
                 m.getKaufdatum() != null ? m.getKaufdatum().toString() : null,
+                m.isHatFoto(),
                 scans,
                 prozesse
         );

@@ -10,7 +10,7 @@
                   exporter="Camunda Modeler"
                   exporterVersion="5.40.0"
                   modeler:executionPlatform="Camunda Cloud"
-                  modeler:executionPlatformVersion="8.8.0">
+                  modeler:executionPlatformVersion="8.5.0">
 
   <bpmn:process id="RfidTestProzess" name="RFID Test Prozess" isExecutable="true">
 
