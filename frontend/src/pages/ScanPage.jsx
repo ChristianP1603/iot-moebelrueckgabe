@@ -123,7 +123,10 @@ export default function ScanPage() {
           event_typ: eventTyp,
           gescannt_von: gescanntVon.trim() || null,
           pruefergebnis: eventTyp === "PRUEFUNG" ? pruefergebnis : null,
-          ersatzteile_vorhanden: eventTyp === "REPARATUR" ? ersatzteileVorhanden : null,
+          ersatzteile_vorhanden:
+            eventTyp === "RUECKGABE" && moebel?.zustand === "IN_REPARATUR"
+              ? ersatzteileVorhanden
+              : null,
         }),
       });
       if (!res.ok) {
@@ -343,7 +346,7 @@ export default function ScanPage() {
               </>
             )}
 
-            {eventTyp === "REPARATUR" && (
+            {eventTyp === "RUECKGABE" && moebel?.zustand === "IN_REPARATUR" && (
               <label style={{
                 display: "flex", alignItems: "center", gap: "10px",
                 fontSize: "0.9rem", fontWeight: 600, color: "#555",
@@ -357,7 +360,7 @@ export default function ScanPage() {
                 />
                 Ersatzteile vorhanden
               </label>
-            )}
+            )}            
 
             <div style={{ fontSize: "0.78rem", color: gpsStatus === "erfasst" ? "#4caf50" : "#999", marginBottom: "16px" }}>
               GPS: {gpsStatus === "erfasst"
