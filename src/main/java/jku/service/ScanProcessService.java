@@ -42,6 +42,13 @@ public class ScanProcessService {
             Pruefergebnis.SCHLECHT, Zustand.DEFEKT
     );
 
+    private static final Map<Zustand, Pruefergebnis> PRUEFERGEBNIS_NACH_ZUSTAND = Map.of(
+        Zustand.GUT, Pruefergebnis.GUT,
+        Zustand.IN_REPARATUR, Pruefergebnis.REPARATUR,
+        Zustand.TEILWEISE_BESCHAEDIGT, Pruefergebnis.TEILWEISE_BESCHAEDIGT,
+        Zustand.DEFEKT, Pruefergebnis.SCHLECHT
+    );
+
     private static final Map<EventTyp, String> EVENT_TO_MESSAGE = Map.of(
             EventTyp.RUECKGABE, "moebel-rueckgabe-start",
             EventTyp.PRUEFUNG, "moebel-pruefung-done",
@@ -70,6 +77,14 @@ public class ScanProcessService {
         Moebelstuck moebel = moebelRepo.findByNfcTagId(request.nfcTagId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag nicht angelegt"));
 
+        Pruefergebnis pruefergebnis = request.pruefergebnis();
+
+        if (request.eventTyp() == EventTyp.RUECKGABE && pruefergebnis == null) {
+            pruefergebnis = PRUEFERGEBNIS_NACH_ZUSTAND.get(moebel.getZustand());
+            log.info("Pruefergebnis fuer Rueckgabe aus Zustand abgeleitet: Zustand={}, pruefergebnis={}",
+                    moebel.getZustand(), pruefergebnis);
+        }
+
         ScanHistory scan = new ScanHistory();
         scan.setMoebelstuckId(moebel.getId());
         scan.setStandortLat(request.standortLat());
@@ -77,7 +92,7 @@ public class ScanProcessService {
         scan.setStandortName(request.standortName());
         scan.setEventTyp(request.eventTyp());
         scan.setGescanntVon(request.gescanntVon());
-        scan.setPruefergebnis(request.pruefergebnis());
+        scan.setPruefergebnis(pruefergebnis);
         scan.setErsatzteileVorhanden(request.ersatzteileVorhanden());
         scanRepo.save(scan);
 
@@ -86,8 +101,8 @@ public class ScanProcessService {
             moebel.setStandortLat(request.standortLat());
             moebel.setStandortLng(request.standortLng());
         }
-        if (request.eventTyp() == EventTyp.PRUEFUNG && request.pruefergebnis() != null) {
-            moebel.setZustand(ZUSTAND_NACH_PRUEFUNG.get(request.pruefergebnis()));
+        if (pruefergebnis != null) {
+            moebel.setZustand(ZUSTAND_NACH_PRUEFUNG.get(pruefergebnis));
         } else {
             Zustand neuerZustand = ZUSTAND_NACH_EVENT.get(request.eventTyp());
             if (neuerZustand != null) {
@@ -104,16 +119,25 @@ public class ScanProcessService {
 
         try {
             if (request.eventTyp() == EventTyp.RUECKGABE) {
+                Map<String, Object> vars = new java.util.HashMap<>();
+                vars.put("moebelId", moebel.getId().toString());
+                vars.put("nfcTagId", moebel.getNfcTagId());
+                vars.put("standort", request.standortName());
+
+                if (pruefergebnis != null) {
+                    vars.put("pruefergebnis", pruefergebnis.name());
+                }
+
+                if (request.ersatzteileVorhanden() != null) {
+                    vars.put("ersatzteileVorhanden", request.ersatzteileVorhanden());
+                }
+
                 ProcessInstanceEvent event = camundaClient
                         .newCreateInstanceCommand()
                         .bpmnProcessId(BPMN_PROCESS_ID)
                         .latestVersion()
-                        .variables(Map.of(
-                                "moebelId", moebel.getId().toString(),
-                                "nfcTagId", moebel.getNfcTagId(),
-                                "standort", request.standortName()
-                        ))
-                        .execute();
+                        .variables(vars)
+                        .execute();                
 
                 ProzessInstanz pi = new ProzessInstanz();
                 pi.setMoebelstuckId(moebel.getId());
@@ -129,8 +153,8 @@ public class ScanProcessService {
                             "standort", request.standortName(),
                             "eventTyp", request.eventTyp().name()
                     ));
-                    if (request.pruefergebnis() != null) {
-                        vars.put("pruefergebnis", request.pruefergebnis().name());
+                    if (pruefergebnis != null) {
+                        vars.put("pruefergebnis", pruefergebnis.name());
                     }
                     if (request.ersatzteileVorhanden() != null) {
                         vars.put("ersatzteileVorhanden", request.ersatzteileVorhanden());
