@@ -4,7 +4,7 @@
     <bpmn:documentation>empfangen-Auftragsbestätigung</bpmn:documentation>
     <bpmn:participant id="Participant_043m1jy" name="GuT" processRef="moebelrueckgabe-gut" />
     <bpmn:participant id="Participant_07wv2gb" name="Lager" processRef="moebelrueckgabe-lager" />
-    <bpmn:participant id="Participant_1f8z8bu" name="Standard" processRef="moebelrueckgabe-standard" />
+    <bpmn:participant id="Participant_1f8z8bu" name="Standardmoebel" processRef="moebelrueckgabe-standard" />
     <bpmn:participant id="Participant_036495v" name="Finanzbuchhaltung" processRef="moebelrueckgabe-fibu" />
     <bpmn:participant id="Participant_0xyk03t" name="Handwerker" processRef="moebelrueckgabe-handwerker" />
     <bpmn:messageFlow id="Flow_05nj703" sourceRef="Event_0iqdf02" targetRef="Event_1i86ik5" />
