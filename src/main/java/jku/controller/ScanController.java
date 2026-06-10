@@ -8,6 +8,7 @@ import jku.service.ScanProcessService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -36,16 +37,17 @@ public class ScanController {
             return Map.of("status", "unbekannt");
         }
         Moebelstuck m = opt.get();
-        return Map.of(
-                "status", "gefunden",
-                "id", m.getId(),
-                "nfc_tag_id", m.getNfcTagId(),
-                "bezeichnung", m.getBezeichnung(),
-                "typ", m.getTyp(),
-                "zustand", m.getZustand(),
-                "standort_name", m.getStandortName() != null ? m.getStandortName() : "",
-                "standort_lat", m.getStandortLat() != null ? m.getStandortLat() : 0,
-                "standort_lng", m.getStandortLng() != null ? m.getStandortLng() : 0
-        );
+        Map<String, Object> result = new HashMap<>();
+        result.put("status", "gefunden");
+        result.put("id", m.getId());
+        result.put("nfc_tag_id", m.getNfcTagId());
+        result.put("bezeichnung", m.getBezeichnung());
+        result.put("typ", m.getTyp());
+        result.put("zustand", m.getZustand());
+        result.put("kategorie", m.getKategorie());
+        result.put("standort_name", m.getStandortName() != null ? m.getStandortName() : "");
+        result.put("standort_lat", m.getStandortLat() != null ? m.getStandortLat() : 0);
+        result.put("standort_lng", m.getStandortLng() != null ? m.getStandortLng() : 0);
+        return result;
     }
 }

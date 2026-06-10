@@ -1,5 +1,6 @@
 package jku;
 
+import jku.entity.MoebelKategorie;
 import jku.entity.Moebelstuck;
 import jku.entity.MoebelTyp;
 import jku.entity.Zustand;
@@ -76,9 +77,11 @@ public class DataSeeder implements ApplicationRunner {
 
         // Managementzentrum
         seed("MOEBL-0018", "Konferenztisch oval", MoebelTyp.KONFERENZTISCH, Zustand.GUT,
-                48.33500, 14.31800, "Managementzentrum Sitzungssaal", 890.00, LocalDate.of(2023, 5, 20));
+                48.33500, 14.31800, "Managementzentrum Sitzungssaal", 890.00, LocalDate.of(2023, 5, 20),
+                MoebelKategorie.SONDERMOEBEL);
         seed("MOEBL-0019", "Chefsessel Leder", MoebelTyp.SESSEL, Zustand.GUT,
-                48.33520, 14.31820, "Managementzentrum Buero 102", 650.00, LocalDate.of(2022, 12, 8));
+                48.33520, 14.31820, "Managementzentrum Buero 102", 650.00, LocalDate.of(2022, 12, 8),
+                MoebelKategorie.SONDERMOEBEL);
         seed("MOEBL-0020", "Regal Buche 4-Boeden", MoebelTyp.REGAL, Zustand.GUT,
                 48.33480, 14.31780, "Managementzentrum Bibliothek", 215.00, LocalDate.of(2021, 7, 14));
         seed("MOEBL-0021", "Garderobe Metall 6-Haken", MoebelTyp.GARDEROBE, Zustand.DEFEKT,
@@ -98,7 +101,8 @@ public class DataSeeder implements ApplicationRunner {
         seed("MOEBL-0026", "Kantinenstuhl Kunststoff", MoebelTyp.STUHL, Zustand.IN_REPARATUR,
                 48.33690, 14.32080, "Mensa Erdgeschoss", 75.00, LocalDate.of(2022, 5, 17));
         seed("MOEBL-0027", "Sofa 3-Sitzer grau", MoebelTyp.SOFA, Zustand.GUT,
-                48.33660, 14.32100, "UniCenter Lounge", 780.00, LocalDate.of(2024, 1, 22));
+                48.33660, 14.32100, "UniCenter Lounge", 780.00, LocalDate.of(2024, 1, 22),
+                MoebelKategorie.SONDERMOEBEL);
         seed("MOEBL-0028", "Schreibtisch kompakt", MoebelTyp.SCHREIBTISCH, Zustand.GUT,
                 48.33680, 14.32120, "UniCenter Lernzone", 199.00, LocalDate.of(2023, 10, 30));
 
@@ -107,6 +111,12 @@ public class DataSeeder implements ApplicationRunner {
 
     private void seed(String nfcTagId, String bezeichnung, MoebelTyp typ, Zustand zustand,
                       double lat, double lng, String standort, double preis, LocalDate kaufdatum) {
+        seed(nfcTagId, bezeichnung, typ, zustand, lat, lng, standort, preis, kaufdatum, MoebelKategorie.STANDARD);
+    }
+
+    private void seed(String nfcTagId, String bezeichnung, MoebelTyp typ, Zustand zustand,
+                      double lat, double lng, String standort, double preis, LocalDate kaufdatum,
+                      MoebelKategorie kategorie) {
         Moebelstuck m = new Moebelstuck();
         m.setNfcTagId(nfcTagId);
         m.setBezeichnung(bezeichnung);
@@ -117,6 +127,7 @@ public class DataSeeder implements ApplicationRunner {
         m.setStandortName(standort);
         m.setPreis(preis);
         m.setKaufdatum(kaufdatum);
+        m.setKategorie(kategorie);
         repo.save(m);
     }
 }

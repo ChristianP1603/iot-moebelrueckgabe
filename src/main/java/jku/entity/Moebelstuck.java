@@ -33,8 +33,9 @@ public class Moebelstuck {
     private Double preis;
     private LocalDate kaufdatum;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private boolean standardmoebel = true;
+    private MoebelKategorie kategorie = MoebelKategorie.STANDARD;
 
     @Column(columnDefinition = "bytea")
     @JsonIgnore
@@ -81,8 +82,11 @@ public class Moebelstuck {
     public LocalDate getKaufdatum() { return kaufdatum; }
     public void setKaufdatum(LocalDate kaufdatum) { this.kaufdatum = kaufdatum; }
 
-    public boolean isStandardmoebel() { return standardmoebel; }
-    public void setStandardmoebel(boolean standardmoebel) { this.standardmoebel = standardmoebel; }
+    public MoebelKategorie getKategorie() { return kategorie; }
+    public void setKategorie(MoebelKategorie kategorie) { this.kategorie = kategorie; }
+
+    @JsonIgnore
+    public boolean isStandardmoebel() { return kategorie == MoebelKategorie.STANDARD; }
 
     public byte[] getFoto() { return foto; }
     public void setFoto(byte[] foto) {

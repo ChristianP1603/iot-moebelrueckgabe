@@ -2,6 +2,7 @@ package jku.api;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jku.entity.MoebelKategorie;
 import jku.entity.MoebelTyp;
 import jku.entity.Zustand;
 import java.time.LocalDate;
@@ -13,5 +14,5 @@ public record MoebelCreateRequest(
         Double preis,
         LocalDate kaufdatum,
         Zustand zustand,
-        Boolean standardmoebel
+        MoebelKategorie kategorie
 ) {}

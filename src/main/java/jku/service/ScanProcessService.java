@@ -132,6 +132,8 @@ public class ScanProcessService {
                     vars.put("ersatzteileVorhanden", request.ersatzteileVorhanden());
                 }
 
+                vars.put("standardmoebel", moebel.isStandardmoebel());
+
                 ProcessInstanceEvent event = camundaClient
                         .newCreateInstanceCommand()
                         .bpmnProcessId(BPMN_PROCESS_ID)

@@ -1,5 +1,6 @@
 package jku.api;
 
+import jku.entity.MoebelKategorie;
 import jku.entity.MoebelTyp;
 import jku.entity.Moebelstuck;
 import jku.entity.ProzessInstanz;
@@ -14,6 +15,7 @@ public record MoebelDetailResponse(
         String bezeichnung,
         MoebelTyp typ,
         Zustand zustand,
+        MoebelKategorie kategorie,
         Double standortLat,
         Double standortLng,
         String standortName,
@@ -30,6 +32,7 @@ public record MoebelDetailResponse(
                 m.getBezeichnung(),
                 m.getTyp(),
                 m.getZustand(),
+                m.getKategorie(),
                 m.getStandortLat(),
                 m.getStandortLng(),
                 m.getStandortName(),

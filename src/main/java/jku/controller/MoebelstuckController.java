@@ -95,8 +95,8 @@ public class MoebelstuckController {
         m.setZustand(request.zustand() != null ? request.zustand() : Zustand.GUT);
         m.setPreis(request.preis());
         m.setKaufdatum(request.kaufdatum());
-        if (request.standardmoebel() != null) {
-            m.setStandardmoebel(request.standardmoebel());
+        if (request.kategorie() != null) {
+            m.setKategorie(request.kategorie());
         }
         return moebelRepo.save(m);
     }
