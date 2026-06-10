@@ -24,7 +24,7 @@ import java.util.Map;
 /**
  * Verarbeitet eingehende Scan-Anfragen aus dem Frontend.
  *
- * Aufgaben:
+ * Aufgaben - App/DB->Camunda-Prozess:
  * - Möbelstück anhand der NFC-Tag-ID aus der Datenbank laden
  * - Prüfergebnis aus Request oder aus dem aktuellen Möbel-Zustand ableiten
  * - Scan-History speichern
@@ -39,10 +39,10 @@ import java.util.Map;
  * - pruefergebnis
  * - ersatzteileVorhanden
  * 
- *  Offizielle Camunda Dokumentationen (Links mit Stand 10.06.2026):
+ *  Referenz
  *  https://docs.camunda.io/docs/reference/glossary/#process-instance
- * https://docs.camunda.io/docs/components/modeler/bpmn/message-events/
- * https://docs.camunda.io/docs/apis-tools/orchestration-cluster-api-rest/specifications/publish-message/?utm_source=chatgpt.com
+ * https://docs.camunda.io/docs/components/modeler/bpmn/message-events
+ * https://docs.camunda.io/docs/apis-tools/orchestration-cluster-api-rest/specifications/publish-message
  * 
  */
 
