@@ -5,13 +5,13 @@ import io.camunda.client.api.response.ActivatedJob;
 import io.camunda.client.annotation.JobWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
 @Component
-@ConditionalOnBean(CamundaClient.class)
+@Profile("camunda")
 public class SendMessageWorker {
 
     private static final Logger log = LoggerFactory.getLogger(SendMessageWorker.class);

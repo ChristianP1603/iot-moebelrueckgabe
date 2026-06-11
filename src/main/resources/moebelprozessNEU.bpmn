@@ -28,6 +28,9 @@
           <zeebe:input source="=moebelId" target="moebelId" />
           <zeebe:input source="=nfcTagId" target="nfcTagId" />
           <zeebe:input source="=standort" target="standort" />
+          <zeebe:input source="=pruefergebnis" target="pruefergebnis" />
+          <zeebe:input source="=standardmoebel" target="standardmoebel" />
+          <zeebe:input source="=ersatzteileVorhanden&#10;" target="ersatzteileVorhanden" />
         </zeebe:ioMapping>
         <zeebe:taskHeaders>
           <zeebe:header key="messageName" value="auftrag-zur-zustandspruefung" />
@@ -113,6 +116,9 @@
           <zeebe:input source="=moebelId" target="moebelId" />
           <zeebe:input source="=nfcTagId" target="nfcTagId" />
           <zeebe:input source="=standort" target="standort" />
+          <zeebe:input source="=pruefergebnis" target="pruefergebnis" />
+          <zeebe:input source="=standardmoebel" target="standardmoebel" />
+          <zeebe:input source="=ersatzteileVorhanden" target="ersatzteileVorhanden" />
         </zeebe:ioMapping>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0l7y97s</bpmn:incoming>
@@ -145,6 +151,7 @@
       <bpmn:incoming>Flow_1qpm7tg</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:startEvent id="Event_1e8pp9y" name="Info über Lageraktualisierung empfangen">
+      <bpmn:extensionElements />
       <bpmn:outgoing>Flow_1r6ve1a</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_1fn7mxm" messageRef="Message_3lbdgic" />
     </bpmn:startEvent>
@@ -302,7 +309,16 @@
     </bpmn:parallelGateway>
     <bpmn:endEvent id="Event_190uvze" name="Info über Aktualisierung d. Lagerbestands senden">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="send-message" />
+        <zeebe:taskDefinition type="send-message" retries="5" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=moebelId" target="moebelId" />
+          <zeebe:input source="=nfcTagId" target="nfcTagId" />
+          <zeebe:input source="=standort" target="standort" />
+        </zeebe:ioMapping>
+        <zeebe:taskHeaders>
+          <zeebe:header key="messageName" value="lager-update-gut" />
+          <zeebe:header key="correlationKeyVariable" value="moebelId" />
+        </zeebe:taskHeaders>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_079b1jt</bpmn:incoming>
       <bpmn:messageEventDefinition id="MessageEventDefinition_05y5jme" />
@@ -312,7 +328,10 @@
       <bpmn:incoming>Flow_0zklf9d</bpmn:incoming>
       <bpmn:outgoing>Flow_079b1jt</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="Flow_1wqti1e" name="ja" sourceRef="Gateway_1d20yxl" targetRef="Gateway_0u8llg0" />
+    <bpmn:sequenceFlow id="Flow_1wqti1e" name="ja" sourceRef="Gateway_1d20yxl" targetRef="Gateway_0u8llg0">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=standardmoebel=true
+</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1lijrcl" name="beschädigt, aber Reparatur möglich" sourceRef="Gateway_0u8llg0" targetRef="Activity_13s448a">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=pruefergebnis = "REPARATUR"</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
@@ -352,12 +371,16 @@
     <bpmn:sequenceFlow id="Flow_05wpwhe" sourceRef="Gateway_1ekej8k" targetRef="Event_0amhna8" />
     <bpmn:sequenceFlow id="Flow_07toj7a" sourceRef="Event_0c7ezz3" targetRef="Activity_1fw0tka" />
     <bpmn:sequenceFlow id="Flow_1ndt03y" sourceRef="Activity_1fw0tka" targetRef="Gateway_1d20yxl" />
-    <bpmn:sequenceFlow id="Flow_1uum3li" name="nein" sourceRef="Gateway_1d20yxl" targetRef="Gateway_0x5hcm5" />
+    <bpmn:sequenceFlow id="Flow_1uum3li" name="nein" sourceRef="Gateway_1d20yxl" targetRef="Gateway_0x5hcm5">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=standardmoebel=false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1gdwek1" name="schlechter Zustand" sourceRef="Gateway_0x5hcm5" targetRef="Activity_0u1kxus">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=SCHLECHT</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=pruefergebnis = "SCHLECHT"
+</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1cx9iv5" name="guter Zustand" sourceRef="Gateway_0x5hcm5" targetRef="Activity_0zo7yfz">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=GUT</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=pruefergebnis = "GUT"
+</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0fb1mwp" sourceRef="Activity_0zo7yfz" targetRef="Gateway_01678o1" />
     <bpmn:sequenceFlow id="Flow_0tdsp95" sourceRef="Gateway_01678o1" targetRef="Gateway_08n6hoc" />
@@ -496,38 +519,38 @@
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_19rfs46">
       <bpmndi:BPMNShape id="Participant_043m1jy_di" bpmnElement="Participant_043m1jy" isHorizontal="true">
-        <dc:Bounds x="160" y="80" width="3200" height="440" />
+        <dc:Bounds x="160" y="60" width="3200" height="240" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0airc41_di" bpmnElement="Activity_0airc41">
-        <dc:Bounds x="850" y="140" width="100" height="80" />
+        <dc:Bounds x="850" y="120" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0j0ieos" bpmnElement="DataObjectReference_1tkcdr8">
-        <dc:Bounds x="932" y="215" width="36" height="50" />
+        <dc:Bounds x="932" y="195" width="36" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="923" y="272" width="54" height="27" />
+          <dc:Bounds x="923" y="252" width="54" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_17gen4g" bpmnElement="Event_1qredjw">
-        <dc:Bounds x="1002" y="162" width="36" height="36" />
+        <dc:Bounds x="1002" y="142" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="993" y="124" width="56" height="27" />
+          <dc:Bounds x="993" y="104" width="56" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1m1kvey_di" bpmnElement="Event_1i86ik5">
-        <dc:Bounds x="772" y="162" width="36" height="36" />
+        <dc:Bounds x="772" y="142" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="762" y="125" width="56" height="27" />
+          <dc:Bounds x="762" y="105" width="56" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0b5cn3i_di" bpmnElement="Flow_0b5cn3i">
-        <di:waypoint x="808" y="180" />
-        <di:waypoint x="850" y="180" />
+        <di:waypoint x="808" y="160" />
+        <di:waypoint x="850" y="160" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1sfzrfi_di" bpmnElement="Flow_1sfzrfi">
-        <di:waypoint x="950" y="180" />
-        <di:waypoint x="1002" y="180" />
+        <di:waypoint x="950" y="160" />
+        <di:waypoint x="1002" y="160" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Participant_07wv2gb_di" bpmnElement="Participant_07wv2gb" isHorizontal="true">
         <dc:Bounds x="160" y="1360" width="3200" height="350" />
@@ -975,16 +998,16 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_05nj703_di" bpmnElement="Flow_05nj703">
         <di:waypoint x="788" y="1822" />
-        <di:waypoint x="788" y="1010" />
-        <di:waypoint x="790" y="1010" />
-        <di:waypoint x="790" y="198" />
+        <di:waypoint x="788" y="1000" />
+        <di:waypoint x="790" y="1000" />
+        <di:waypoint x="790" y="178" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_10eh7ym_di" bpmnElement="Flow_10eh7ym">
         <di:waypoint x="2120" y="918" />
         <di:waypoint x="2120" y="1532" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0xkxyzz_di" bpmnElement="Flow_0xkxyzz">
-        <di:waypoint x="1020" y="198" />
+        <di:waypoint x="1020" y="178" />
         <di:waypoint x="1020" y="592" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0rs2s2n_di" bpmnElement="Flow_0rs2s2n">

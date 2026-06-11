@@ -7,7 +7,6 @@ camunda:
         auth:
             method: none
         deployment:
-            enabled: true
-            resource-pattern: "classpath*:*.bpmn"
+            enabled: false
         connection:
             keep-alive: false
