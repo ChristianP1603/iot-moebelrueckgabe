@@ -47,6 +47,8 @@ docker compose up -d
 cd frontend
 npm install
 npm run dev
+
+NOTE zum Image neu bauen und starten: docker compose down -v und docker compose up --build
 ```
 
 ### Im Browser oeffnen
