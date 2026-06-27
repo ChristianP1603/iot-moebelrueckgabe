@@ -47,13 +47,15 @@ docker compose up -d
 cd frontend
 npm install
 npm run dev
+
+NOTE zum Image neu bauen und starten: docker compose down -v und docker compose up --build
 ```
 
 ### Im Browser oeffnen
 
 `http://localhost:5173` - Die Karte mit allen Moebelstuecken wird angezeigt.
 
-Die Datenbank wird beim ersten Start automatisch mit 5 Test-Moebelstuecken befuellt.
+Die Datenbank wird beim ersten Start automatisch mit 28 Test-Moebelstuecken befuellt.
 
 ### Stoppen
 
@@ -135,12 +137,22 @@ Bei einem Scan mit Event-Typ RUECKGABE wird ein Camunda-Prozess gestartet. Alle 
 | Event-Typ      | BPMN-Schritt                          | Zustandsaenderung       |
 |----------------|---------------------------------------|-------------------------|
 | RUECKGABE      | Moebelstueck zur Rueckgabe anmelden   | -                       |
-| PRUEFUNG       | Zustandspruefung durchfuehren         | -                       |
-| EINLAGERUNG    | Moebelstueck einlagern                | -                       |
-| TRANSPORT      | Transport zum Lager                   | -                       |
+| PRUEFUNG       | Zustandspruefung durchfuehren         | je nach Pruefergebnis   |
+| EINLAGERUNG    | Moebelstueck einlagern                | -> GUT                  |
 | REPARATUR      | Reparatur starten                     | -> IN_REPARATUR         |
-| ENTSORGUNG     | Moebelstueck entsorgen                | -> ENTSORGT             |
 | TEILDEMONTAGE  | Teilweise beschaedigt, Teile entnehmen| -> TEILWEISE_BESCHAEDIGT|
+| ENTSORGUNG     | Moebelstueck entsorgen                | -> ENTSORGT             |
+
+### Moebel-Kategorien
+
+Jedes Moebelstueck hat eine Kategorie (Enum `MoebelKategorie`):
+
+| Kategorie    | Beschreibung                                                        |
+|--------------|---------------------------------------------------------------------|
+| STANDARD     | Standardmoebel - nach Pruefung 4 Ergebnisse moeglich               |
+| SONDERMOEBEL | Sondermoebel - nach Pruefung nur GUT oder SCHLECHT                  |
+
+Im BPMN-Prozess entscheidet ein XOR-Gateway nach der Pruefung, welcher Pfad genommen wird.
 
 ## Projektstruktur
 
@@ -183,3 +195,4 @@ iot-moebelrueckgabe/
 - **Prozessengine:** Camunda 8 / Zeebe (optional)
 - **NFC:** NTAG215 Tags mit URL-Encoding
 - **HTTPS:** ngrok mit statischer Domain
+- **Tests:** JUnit 5, Spring Boot Test, H2 (In-Memory)

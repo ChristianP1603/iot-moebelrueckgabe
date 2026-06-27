@@ -5,6 +5,7 @@ import io.camunda.client.api.response.ActivatedJob;
 import io.camunda.client.annotation.JobWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -29,6 +30,7 @@ import java.util.Map;
  */
 
 @Component
+@Profile("camunda")
 public class SendMessageWorker {
 
     // Logger für Konsolen-/Serverausgaben

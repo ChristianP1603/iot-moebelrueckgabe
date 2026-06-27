@@ -27,3 +27,12 @@ export const TYP_LABELS = {
 export function typLabel(typ) {
   return TYP_LABELS[typ] || typ;
 }
+
+export const KATEGORIE_LABELS = {
+  STANDARD: "Standardmöbel",
+  SONDERMOEBEL: "Sondermöbel",
+};
+
+export function kategorieLabel(kategorie) {
+  return KATEGORIE_LABELS[kategorie] || kategorie;
+}

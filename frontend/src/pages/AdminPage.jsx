@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { typLabel } from "../constants.js";
+import { typLabel, kategorieLabel } from "../constants.js";
 
 const API = "/api";
 
@@ -129,6 +129,14 @@ export default function AdminPage() {
                 <span style={{ margin: "0 6px" }}>·</span>
                 <span style={{ color: ZUSTAND_FARBEN[m.zustand] || "#999", fontWeight: 600 }}>
                   {m.zustand?.replace(/_/g, " ")}
+                </span>
+                <span style={{ margin: "0 6px" }}>·</span>
+                <span style={{
+                  background: m.kategorie === "SONDERMOEBEL" ? "#fff3e0" : "#e3f2fd",
+                  color: m.kategorie === "SONDERMOEBEL" ? "#e65100" : "#1565c0",
+                  padding: "1px 6px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 600,
+                }}>
+                  {kategorieLabel(m.kategorie)}
                 </span>
                 {m.standort_name && (
                   <>

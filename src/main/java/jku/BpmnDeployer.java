@@ -26,7 +26,7 @@ public class BpmnDeployer implements ApplicationRunner {
         }
         try {
             camundaClient.newDeployResourceCommand()
-                    .addResourceFromClasspath("moebelprozess.bpmn")
+                    .addResourceFromClasspath("moebelprozessNEU.bpmn")
                     .send()
                     .join();
             log.info("BPMN deployed.");

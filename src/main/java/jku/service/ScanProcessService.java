@@ -38,12 +38,12 @@ import java.util.Map;
  * - standort
  * - pruefergebnis
  * - ersatzteileVorhanden
- * 
+ *
  *  Referenz
  *  https://docs.camunda.io/docs/reference/glossary/#process-instance
  * https://docs.camunda.io/docs/components/modeler/bpmn/message-events
  * https://docs.camunda.io/docs/apis-tools/orchestration-cluster-api-rest/specifications/publish-message
- * 
+ *
  */
 
 @Service
@@ -109,7 +109,7 @@ public class ScanProcessService {
 
     // Hauptmethode: verarbeitet einen Scan aus dem Frontend
     public Moebelstuck handleScan(ScanRequest request) {
-        
+
         // Möbelstück anhand der NFC-Tag-ID suchen
         Moebelstuck moebel = moebelRepo.findByNfcTagId(request.nfcTagId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag nicht angelegt"));
@@ -118,7 +118,7 @@ public class ScanProcessService {
         Pruefergebnis pruefergebnis = request.pruefergebnis();
 
         // Falls Rückgabe und kein Prüfergebnis mitgeschickt:
-        // Prüfergebnis aus aktuellem Möbel-Zustand ableiten        
+        // Prüfergebnis aus aktuellem Möbel-Zustand ableiten
         if (request.eventTyp() == EventTyp.RUECKGABE && pruefergebnis == null) {
             pruefergebnis = PRUEFERGEBNIS_NACH_ZUSTAND.get(moebel.getZustand());
             log.info("Pruefergebnis fuer Rueckgabe aus Zustand abgeleitet: Zustand={}, pruefergebnis={}",
@@ -135,7 +135,7 @@ public class ScanProcessService {
         scan.setGescanntVon(request.gescanntVon());
         scan.setPruefergebnis(pruefergebnis);
         scan.setErsatzteileVorhanden(request.ersatzteileVorhanden());
-        
+
         // Scan-History in DB speichern
         scanRepo.save(scan);
 
@@ -173,7 +173,7 @@ public class ScanProcessService {
         try {
             // Fall 1: Rückgabe -> neue Prozessinstanz wird erzeugt
             if (request.eventTyp() == EventTyp.RUECKGABE) {
-                
+
                 // Variablen für Camunda-Prozess zusammenbauen
                 Map<String, Object> vars = new java.util.HashMap<>();
                 vars.put("moebelId", moebel.getId().toString());
@@ -189,6 +189,8 @@ public class ScanProcessService {
                 if (request.ersatzteileVorhanden() != null) {
                     vars.put("ersatzteileVorhanden", request.ersatzteileVorhanden());
                 }
+
+                vars.put("standardmoebel", moebel.isStandardmoebel());
 
                 // Neue Camunda-Prozessinstanz starten
                 ProcessInstanceEvent event = camundaClient
