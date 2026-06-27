@@ -71,14 +71,6 @@ public class ScanProcessService {
             Pruefergebnis.SCHLECHT, Zustand.DEFEKT
     );
 
-    // Zuordnung: aktueller Möbel-Zustand -> passendes Prüfergebnis
-    private static final Map<Zustand, Pruefergebnis> PRUEFERGEBNIS_NACH_ZUSTAND = Map.of(
-        Zustand.GUT, Pruefergebnis.GUT,
-        Zustand.IN_REPARATUR, Pruefergebnis.REPARATUR,
-        Zustand.TEILWEISE_BESCHAEDIGT, Pruefergebnis.TEILWEISE_BESCHAEDIGT,
-        Zustand.DEFEKT, Pruefergebnis.SCHLECHT
-    );
-
     // Zuordnung: Event -> Camunda Message Name
     private static final Map<EventTyp, String> EVENT_TO_MESSAGE = Map.of(
             EventTyp.RUECKGABE, "moebel-rueckgabe-start",
@@ -117,14 +109,6 @@ public class ScanProcessService {
         // Prüfergebnis aus Request holen
         Pruefergebnis pruefergebnis = request.pruefergebnis();
 
-        // Falls Rückgabe und kein Prüfergebnis mitgeschickt:
-        // Prüfergebnis aus aktuellem Möbel-Zustand ableiten
-        if (request.eventTyp() == EventTyp.RUECKGABE && pruefergebnis == null) {
-            pruefergebnis = PRUEFERGEBNIS_NACH_ZUSTAND.get(moebel.getZustand());
-            log.info("Pruefergebnis fuer Rueckgabe aus Zustand abgeleitet: Zustand={}, pruefergebnis={}",
-                    moebel.getZustand(), pruefergebnis);
-        }
-
         // Neuer Scan-History-Eintrag wird erzeugt
         ScanHistory scan = new ScanHistory();
         scan.setMoebelstuckId(moebel.getId());
@@ -150,10 +134,9 @@ public class ScanProcessService {
 
         // Wenn Prüfergebnis vorhanden:
         // Möbel-Zustand aus Prüfergebnis ableiten
-        if (pruefergebnis != null) {
+        if (request.eventTyp() == EventTyp.PRUEFUNG && pruefergebnis != null) {
             moebel.setZustand(ZUSTAND_NACH_PRUEFUNG.get(pruefergebnis));
         } else {
-            // Sonst Möbel-Zustand aus Event ableiten
             Zustand neuerZustand = ZUSTAND_NACH_EVENT.get(request.eventTyp());
             if (neuerZustand != null) {
                 moebel.setZustand(neuerZustand);
@@ -179,17 +162,6 @@ public class ScanProcessService {
                 vars.put("moebelId", moebel.getId().toString());
                 vars.put("nfcTagId", moebel.getNfcTagId());
                 vars.put("standort", request.standortName());
-
-                // Prüfergebnis nur mitgeben, wenn vorhanden
-                if (pruefergebnis != null) {
-                    vars.put("pruefergebnis", pruefergebnis.name());
-                }
-
-                // Ersatzteile nur mitgeben, wenn vorhanden
-                if (request.ersatzteileVorhanden() != null) {
-                    vars.put("ersatzteileVorhanden", request.ersatzteileVorhanden());
-                }
-
                 vars.put("standardmoebel", moebel.isStandardmoebel());
 
                 // Neue Camunda-Prozessinstanz starten

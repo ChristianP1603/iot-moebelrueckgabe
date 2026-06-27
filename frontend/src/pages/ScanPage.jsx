@@ -7,10 +7,6 @@ const API = "/api";
 const EVENT_OPTIONEN = [
   { value: "RUECKGABE", label: "Rückgabe" },
   { value: "PRUEFUNG", label: "Prüfung" },
-  { value: "EINLAGERUNG", label: "Einlagerung" },
-  { value: "REPARATUR", label: "Reparatur" },
-  { value: "TEILDEMONTAGE", label: "Teildemontage" },
-  { value: "ENTSORGUNG", label: "Entsorgung" },
 ];
 
 const PRUEFERGEBNIS_OPTIONEN = [
@@ -73,6 +69,12 @@ export default function ScanPage() {
     lookupTag(tagIdFromUrl);
   }, [tagIdFromUrl]);
 
+  useEffect(() => {
+    if (eventTyp !== "PRUEFUNG" || pruefergebnis !== "REPARATUR") {
+      setErsatzteileVorhanden(false);
+    }
+  }, [eventTyp, pruefergebnis]);
+
   function lookupTag(tagId) {
     setLoading(true);
     setTagUnbekannt(false);
@@ -124,7 +126,7 @@ export default function ScanPage() {
           gescannt_von: gescanntVon.trim() || null,
           pruefergebnis: eventTyp === "PRUEFUNG" ? pruefergebnis : null,
           ersatzteile_vorhanden:
-            eventTyp === "RUECKGABE" && moebel?.zustand === "IN_REPARATUR"
+            eventTyp === "PRUEFUNG" && pruefergebnis === "REPARATUR"
               ? ersatzteileVorhanden
               : null,
         }),
@@ -350,7 +352,7 @@ export default function ScanPage() {
               </>
             )}
 
-            {eventTyp === "RUECKGABE" && moebel?.zustand === "IN_REPARATUR" && (
+             {eventTyp === "PRUEFUNG" && pruefergebnis === "REPARATUR" && (
               <label style={{
                 display: "flex", alignItems: "center", gap: "10px",
                 fontSize: "0.9rem", fontWeight: 600, color: "#555",
@@ -364,7 +366,8 @@ export default function ScanPage() {
                 />
                 Ersatzteile vorhanden
               </label>
-            )}            
+            )}
+
 
             <div style={{ fontSize: "0.78rem", color: gpsStatus === "erfasst" ? "#4caf50" : "#999", marginBottom: "16px" }}>
               GPS: {gpsStatus === "erfasst"
