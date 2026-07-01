@@ -22,6 +22,14 @@ public record MoebelDetailResponse(
         Double preis,
         String kaufdatum,
         boolean hatFoto,
+        String kommentar,
+        String nutzer,
+        String eigentuemer,
+        String reserviertVon,
+        String reserviertBis,
+        String reserviertFuer,
+        Boolean verfuegbar,
+        boolean entfernt,
         List<ScanHistory> scanHistory,
         List<ProzessInstanz> prozessInstanzen
 ) {
@@ -39,6 +47,14 @@ public record MoebelDetailResponse(
                 m.getPreis(),
                 m.getKaufdatum() != null ? m.getKaufdatum().toString() : null,
                 m.isHatFoto(),
+                m.getKommentar(),
+                m.getNutzer(),
+                m.getEigentuemer(),
+                m.getReserviertVon() != null ? m.getReserviertVon().toString() : null,
+                m.getReserviertBis() != null ? m.getReserviertBis().toString() : null,
+                m.getReserviertFuer(),
+                m.getVerfuegbar(),
+                m.isEntfernt(),
                 scans,
                 prozesse
         );

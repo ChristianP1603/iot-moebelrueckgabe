@@ -41,4 +41,10 @@ class MoebelstuckTest {
         m.setFoto(new byte[0]);
         assertFalse(m.isHatFoto());
     }
+
+    @Test
+    void defaultVerfuegbarIstNull() {
+        Moebelstuck m = new Moebelstuck();
+        assertNull(m.getVerfuegbar());
+    }
 }

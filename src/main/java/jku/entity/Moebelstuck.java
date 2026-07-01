@@ -33,6 +33,21 @@ public class Moebelstuck {
     private Double preis;
     private LocalDate kaufdatum;
 
+    @Column(columnDefinition = "text")
+    private String kommentar;
+
+    private String nutzer;
+    private String eigentuemer;
+
+    private LocalDate reserviertVon;
+    private LocalDate reserviertBis;
+    private String reserviertFuer;
+
+    private Boolean verfuegbar;
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean entfernt;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private MoebelKategorie kategorie = MoebelKategorie.STANDARD;
@@ -81,6 +96,30 @@ public class Moebelstuck {
 
     public LocalDate getKaufdatum() { return kaufdatum; }
     public void setKaufdatum(LocalDate kaufdatum) { this.kaufdatum = kaufdatum; }
+
+    public String getKommentar() { return kommentar; }
+    public void setKommentar(String kommentar) { this.kommentar = kommentar; }
+
+    public String getNutzer() { return nutzer; }
+    public void setNutzer(String nutzer) { this.nutzer = nutzer; }
+
+    public String getEigentuemer() { return eigentuemer; }
+    public void setEigentuemer(String eigentuemer) { this.eigentuemer = eigentuemer; }
+
+    public LocalDate getReserviertVon() { return reserviertVon; }
+    public void setReserviertVon(LocalDate reserviertVon) { this.reserviertVon = reserviertVon; }
+
+    public LocalDate getReserviertBis() { return reserviertBis; }
+    public void setReserviertBis(LocalDate reserviertBis) { this.reserviertBis = reserviertBis; }
+
+    public String getReserviertFuer() { return reserviertFuer; }
+    public void setReserviertFuer(String reserviertFuer) { this.reserviertFuer = reserviertFuer; }
+
+    public Boolean getVerfuegbar() { return verfuegbar; }
+    public void setVerfuegbar(Boolean verfuegbar) { this.verfuegbar = verfuegbar; }
+
+    public boolean isEntfernt() { return entfernt; }
+    public void setEntfernt(boolean entfernt) { this.entfernt = entfernt; }
 
     public MoebelKategorie getKategorie() { return kategorie; }
     public void setKategorie(MoebelKategorie kategorie) { this.kategorie = kategorie; }

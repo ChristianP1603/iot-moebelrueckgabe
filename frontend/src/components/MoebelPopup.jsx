@@ -36,6 +36,14 @@ export default function MoebelPopup({ moebel, scans, loading }) {
           {label}
         </span>
         <span style={{ marginLeft: "8px", color: "#666" }}>{typLabel(moebel.typ)}</span>
+        {moebel.verfuegbar != null && (
+          <span style={{
+            display: "inline-block", marginLeft: "8px", padding: "2px 8px", borderRadius: "12px",
+            background: moebel.verfuegbar ? "#4caf50" : "#bbb", color: "white", fontSize: "0.72rem", fontWeight: 600,
+          }}>
+            {moebel.verfuegbar ? "Verfügbar" : "Nicht verfügbar"}
+          </span>
+        )}
       </div>
 
       {moebel.hat_foto && (
@@ -66,6 +74,34 @@ export default function MoebelPopup({ moebel, scans, loading }) {
             <tr>
               <td style={{ color: "#888", paddingRight: "8px" }}>Kaufdatum</td>
               <td>{new Date(moebel.kaufdatum).toLocaleDateString("de-AT")}</td>
+            </tr>
+          )}
+          {moebel.nutzer && (
+            <tr>
+              <td style={{ color: "#888", paddingRight: "8px" }}>Nutzer</td>
+              <td>{moebel.nutzer}</td>
+            </tr>
+          )}
+          {moebel.eigentuemer && (
+            <tr>
+              <td style={{ color: "#888", paddingRight: "8px" }}>Eigentum</td>
+              <td>{moebel.eigentuemer}</td>
+            </tr>
+          )}
+          {moebel.reserviert_fuer && (
+            <tr>
+              <td style={{ color: "#888", paddingRight: "8px", verticalAlign: "top" }}>Reserviert für</td>
+              <td>
+                {moebel.reserviert_fuer}
+                {moebel.reserviert_von && moebel.reserviert_bis &&
+                  ` (${new Date(moebel.reserviert_von).toLocaleDateString("de-AT")} – ${new Date(moebel.reserviert_bis).toLocaleDateString("de-AT")})`}
+              </td>
+            </tr>
+          )}
+          {moebel.kommentar && (
+            <tr>
+              <td style={{ color: "#888", paddingRight: "8px", verticalAlign: "top" }}>Kommentar</td>
+              <td>{moebel.kommentar}</td>
             </tr>
           )}
           <tr>

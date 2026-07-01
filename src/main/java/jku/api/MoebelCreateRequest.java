@@ -14,5 +14,11 @@ public record MoebelCreateRequest(
         Double preis,
         LocalDate kaufdatum,
         Zustand zustand,
-        MoebelKategorie kategorie
+        MoebelKategorie kategorie,
+        String kommentar,
+        String nutzer,
+        String eigentuemer,
+        LocalDate reserviertVon,
+        LocalDate reserviertBis,
+        String reserviertFuer
 ) {}

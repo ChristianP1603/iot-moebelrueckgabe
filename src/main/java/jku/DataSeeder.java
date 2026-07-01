@@ -13,12 +13,23 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 @Component
 @Order(2)
 public class DataSeeder implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DataSeeder.class);
+
+    private static final Map<String, String> NUTZER_JE_GEBAEUDE = Map.of(
+            "Keplergebaeude", "Institut fuer Wirtschaftsinformatik",
+            "Science Park", "Institut fuer Systemsoftware",
+            "TNF-Tower", "Institut fuer Telekooperation",
+            "Managementzentrum", "Rektorat",
+            "Bibliothek", "Universitaetsbibliothek",
+            "Mensa", "JKU Betrieb",
+            "UniCenter", "OeH Linz"
+    );
 
     private final MoebelstuckRepository repo;
 
@@ -28,13 +39,17 @@ public class DataSeeder implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        if (repo.count() > 0) {
+        if (repo.count() == 0) {
+            log.info("Seed-Daten werden eingefuegt...");
+            seedAlle();
+            log.info("{} Moebelstuecke eingefuegt.", repo.count());
+        } else {
             log.info("Datenbank enthaelt bereits {} Moebelstuecke, kein Seeding noetig.", repo.count());
-            return;
         }
+        ergaenzeMetadaten();
+    }
 
-        log.info("Seed-Daten werden eingefuegt...");
-
+    private void seedAlle() {
         // Keplergebaeude
         seed("MOEBL-0001", "Schreibtisch Modell A", MoebelTyp.SCHREIBTISCH, Zustand.GUT,
                 48.33630, 14.31940, "Keplergebaeude Buero 301", 249.99, LocalDate.of(2023, 3, 15));
@@ -105,8 +120,6 @@ public class DataSeeder implements ApplicationRunner {
                 MoebelKategorie.SONDERMOEBEL);
         seed("MOEBL-0028", "Schreibtisch kompakt", MoebelTyp.SCHREIBTISCH, Zustand.GUT,
                 48.33680, 14.32120, "UniCenter Lernzone", 199.00, LocalDate.of(2023, 10, 30));
-
-        log.info("{} Moebelstuecke eingefuegt.", repo.count());
     }
 
     private void seed(String nfcTagId, String bezeichnung, MoebelTyp typ, Zustand zustand,
@@ -128,6 +141,70 @@ public class DataSeeder implements ApplicationRunner {
         m.setPreis(preis);
         m.setKaufdatum(kaufdatum);
         m.setKategorie(kategorie);
+        m.setVerfuegbar(false);
         repo.save(m);
+    }
+
+    private void ergaenzeMetadaten() {
+        for (Moebelstuck m : repo.findAll()) {
+            boolean geaendert = false;
+            if (m.getEigentuemer() == null) {
+                m.setEigentuemer("JKU Gebaeudemanagement");
+                geaendert = true;
+            }
+            if (m.getNutzer() == null) {
+                m.setNutzer(nutzerFuer(m.getStandortName()));
+                geaendert = true;
+            }
+            if (m.getVerfuegbar() == null) {
+                m.setVerfuegbar(false);
+                geaendert = true;
+            }
+            if (geaendert) {
+                repo.save(m);
+            }
+        }
+
+        kommentar("MOEBL-0001", "Leichte Gebrauchsspuren an der Tischkante");
+        kommentar("MOEBL-0002", "Rollen schwergaengig, Rueckenlehne wackelt");
+        kommentar("MOEBL-0004", "Tischplatte muss nachgezogen werden");
+        kommentar("MOEBL-0014", "Sitzpolster eingerissen");
+        kommentar("MOEBL-0018", "Sonderanfertigung, hochwertige Ausfuehrung");
+        kommentar("MOEBL-0021", "Zwei Haken abgebrochen");
+
+        reservierung("MOEBL-0003", LocalDate.now(), LocalDate.now().plusDays(14), "Institut fuer Telekooperation");
+        reservierung("MOEBL-0022", LocalDate.now().plusDays(3), LocalDate.now().plusDays(10), "Universitaetsbibliothek");
+        reservierung("MOEBL-0027", LocalDate.now().plusDays(1), LocalDate.now().plusDays(7), "Rektorat");
+    }
+
+    private void kommentar(String nfcTagId, String text) {
+        repo.findByNfcTagId(nfcTagId).ifPresent(m -> {
+            if (m.getKommentar() == null) {
+                m.setKommentar(text);
+                repo.save(m);
+            }
+        });
+    }
+
+    private void reservierung(String nfcTagId, LocalDate von, LocalDate bis, String fuer) {
+        repo.findByNfcTagId(nfcTagId).ifPresent(m -> {
+            if (m.getReserviertFuer() == null) {
+                m.setReserviertVon(von);
+                m.setReserviertBis(bis);
+                m.setReserviertFuer(fuer);
+                repo.save(m);
+            }
+        });
+    }
+
+    private String nutzerFuer(String standort) {
+        if (standort == null) {
+            return "JKU";
+        }
+        return NUTZER_JE_GEBAEUDE.entrySet().stream()
+                .filter(e -> standort.startsWith(e.getKey()))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse("JKU");
     }
 }

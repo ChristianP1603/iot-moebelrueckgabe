@@ -70,7 +70,7 @@ public class MoebelstuckController {
 
     @GetMapping
     public List<Moebelstuck> listAll() {
-        return moebelRepo.findAll();
+        return moebelRepo.findByEntferntFalse();
     }
 
     @GetMapping("/{id}")
@@ -98,6 +98,13 @@ public class MoebelstuckController {
         if (request.kategorie() != null) {
             m.setKategorie(request.kategorie());
         }
+        m.setKommentar(request.kommentar());
+        m.setNutzer(request.nutzer());
+        m.setEigentuemer(request.eigentuemer());
+        m.setReserviertVon(request.reserviertVon());
+        m.setReserviertBis(request.reserviertBis());
+        m.setReserviertFuer(request.reserviertFuer());
+        m.setVerfuegbar(false);
         return moebelRepo.save(m);
     }
 
@@ -163,6 +170,8 @@ public class MoebelstuckController {
             m.setStandortLat(lat);
             m.setStandortLng(lng);
             m.setStandortName(standortName);
+            m.setVerfuegbar(false);
+            m.setEntfernt(false);
         }
     }
 }
