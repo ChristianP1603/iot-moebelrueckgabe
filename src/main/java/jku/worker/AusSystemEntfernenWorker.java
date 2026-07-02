@@ -26,6 +26,7 @@ public class AusSystemEntfernenWorker {
 
     void entferne(Long moebelId) {
         moebelRepo.findById(moebelId).ifPresent(m -> {
+            m.setVerfuegbar(false);
             m.setEntfernt(true);
             moebelRepo.save(m);
         });
